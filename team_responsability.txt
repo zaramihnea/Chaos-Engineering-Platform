@@ -1,0 +1,53 @@
+Project: Chaos Engineering Platform
+Coordinator: Olariu Florin
+Team size: 4
+
+Members & Roles
+---------------
+
+1) Zară Mihnea-Tudor (Scrum master & Backend Developer)
+   Responsibilities:
+   - Coordinates meetings, timeline, and portal submissions.
+   - Designs high-level architecture (Control Plane + Agent).
+   - Develops the **Control Plane API** (Go or Node):
+     - Create/read/run/abort experiments.
+     - Connect to Postgres for experiment storage.
+   - Integrates Prometheus SLO evaluator (error rate, latency checks).
+   - Sets up GitHub repo and CI pipelines.
+
+2) Biliuți Andrei (Agent & Fault Injection Developer)
+   Responsibilities:
+   - Builds the **Kubernetes Agent** (DaemonSet) that executes faults.
+   - Implements core faults:
+     - pod kill, cpu hog, memory hog, network delay, and partition.
+   - Handles secure communication (mTLS) with the Control Plane.
+   - Adds “dry-run” and “blast-radius preview” for safe testing.
+   - Creates Helm chart for the agent.
+
+3) Roman Iulian (Test Application & Observability Developer)
+   Responsibilities:
+   - Builds a small **microservices test app**:
+     - Services: Gateway, Catalog, Cart, Payment.
+     - Adds Prometheus metrics (latency, error rate, requests).
+   - Sets up Grafana dashboards and alert rules.
+   - Verifies that chaos experiments trigger SLO alerts and recover correctly.
+   - Adds a basic load test (k6 or hey) for steady-state validation.
+
+4) Mihoc Roxana (Workflow, UI & Documentation Developer)
+   Responsibilities:
+   - Develops the **Experiment Workflow Engine** (sequence of faults).
+   - Builds a **simple web UI** or CLI tool to create and run experiments.
+   - Implements report generation (JSON/Markdown with results & SLO deltas).
+   - Writes developer documentation, user guide, and project report.
+   - Helps with testing and demo preparation.
+
+Collaboration
+-------------
+- Weekly progress sync and demo (led by Zară Mihnea-Tudor).
+- Code reviews: each PR reviewed by one peer.
+- Shared Trello board for all sprint tasks.
+- Everyone contributes to testing and documentation.
+
+Tools
+---------------------
+- GitHub, Prometheus, Grafana, Docker/Podman, Kubernetes (Kind/Minikube).
