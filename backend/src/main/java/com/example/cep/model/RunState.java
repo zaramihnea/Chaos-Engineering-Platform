@@ -1,0 +1,2 @@
+package com.example.cep.model;
+public enum RunState { SCHEDULED, RUNNING, ABORTED, COMPLETED, FAILED, BLOCKED_BY_POLICY, AWAITING_APPROVAL }
