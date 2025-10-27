@@ -1,7 +1,5 @@
 package com.example.workflowui.aop;
 
-package com.example.workflowui.aop;
-
 public aspect LoggingAspect {
 
     pointcut lifecycle():
