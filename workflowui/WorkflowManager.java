@@ -24,7 +24,6 @@ public class WorkflowManager {
         return instance;
     }
 
-    public void registerWorkflow(Workflow workflow) {}
     public void executeWorkflow(Workflow workflow) {
         System.out.println("Workflow is executing...");
     }
