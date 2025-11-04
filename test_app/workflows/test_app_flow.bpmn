@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+  targetNamespace="http://example.com/test-app/bpmn"
+  exporter="GitHub Copilot"
+  exporterVersion="1.0">
+
+  <bpmn:process id="test_app_process" name="Test App Flow with Chaos & Observability" isExecutable="true">
+
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Gateway" name="Gateway">
+        <bpmn:flowNodeRef>StartEvent_TestApp</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Catalog" name="Catalog Service">
+        <bpmn:flowNodeRef>Task_GetItems</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Cart" name="Cart Service">
+        <bpmn:flowNodeRef>Task_AddToCart</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Checkout</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Payment" name="Payment Service">
+        <bpmn:flowNodeRef>Task_ProcessPayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_OrderPaid</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Agent" name="Fault Injection Agent">
+        <bpmn:flowNodeRef>Task_InjectFault</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_SLO</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Chaos</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Observability" name="Observability (Prometheus/Grafana)">
+        <bpmn:flowNodeRef>Task_ScrapeMetrics</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_UpdateDashboard</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CollectLogs</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Event_SLO_Alert</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_AbortExperiment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Obs</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Load" name="Load Testing (k6)">
+        <bpmn:flowNodeRef>Task_K6Start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EndEvent_Load</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <!-- Flow: User journey -->
+    <bpmn:startEvent id="StartEvent_TestApp" name="User Journey Start">
+      <bpmn:outgoing>Flow_StartToParallel</bpmn:outgoing>
+    </bpmn:startEvent>
+
+    <bpmn:parallelGateway id="Gateway_Parallel" name="Run Journey + Chaos in Parallel">
+      <bpmn:incoming>Flow_StartToParallel</bpmn:incoming>
+      <bpmn:outgoing>Flow_ParallelToGetItems</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ParallelToChaos</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ParallelToK6</bpmn:outgoing>
+      <bpmn:outgoing>Flow_ParallelToObs</bpmn:outgoing>
+    </bpmn:parallelGateway>
+
+    <bpmn:serviceTask id="Task_GetItems" name="Get products (Catalog)" camunda:type="external" camunda:topic="catalog.get_items">
+      <bpmn:incoming>Flow_ParallelToGetItems</bpmn:incoming>
+      <bpmn:outgoing>Flow_GetItemsToAdd</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <!-- Observability pipeline -->
+    <bpmn:serviceTask id="Task_ScrapeMetrics" name="Scrape metrics (Prometheus)" camunda:type="external" camunda:topic="prometheus.scrape">
+      <bpmn:incoming>Flow_ParallelToObs</bpmn:incoming>
+      <bpmn:outgoing>Flow_ObsToDash</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="targets">gateway:5000,cart:5002,payment:5003,catalog:5001</camunda:inputParameter>
+          <camunda:inputParameter name="path">/metrics</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_UpdateDashboard" name="Update Grafana dashboard" camunda:type="external" camunda:topic="grafana.update_dashboard">
+      <bpmn:incoming>Flow_ObsToDash</bpmn:incoming>
+      <bpmn:outgoing>Flow_DashToLogs</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="dashboard_name">test_app_dashboard</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_CollectLogs" name="Collect structured logs" camunda:type="external" camunda:topic="logging.collect">
+      <bpmn:incoming>Flow_DashToLogs</bpmn:incoming>
+      <bpmn:outgoing>Flow_LogsToObsEnd</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="sources">gateway,cart,payment,catalog</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Obs" name="Observability branch end">
+      <bpmn:incoming>Flow_LogsToObsEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:serviceTask id="Task_AddToCart" name="Add to cart (user 'bob')" camunda:type="external" camunda:topic="cart.add_item">
+      <bpmn:incoming>Flow_GetItemsToAdd</bpmn:incoming>
+      <bpmn:outgoing>Flow_AddToCheckout</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="user_id">bob</camunda:inputParameter>
+          <camunda:inputParameter name="product_id">1</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_Checkout" name="Checkout (Cart)" camunda:type="external" camunda:topic="cart.checkout">
+      <bpmn:incoming>Flow_AddToCheckout</bpmn:incoming>
+      <bpmn:outgoing>Flow_CheckoutToPay</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="user_id">bob</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:serviceTask id="Task_ProcessPayment" name="Process payment" camunda:type="external" camunda:topic="payment.process">
+      <bpmn:incoming>Flow_CheckoutToPay</bpmn:incoming>
+      <bpmn:outgoing>Flow_PayToEnd</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="currency">USD</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_OrderPaid" name="Order paid">
+      <bpmn:incoming>Flow_PayToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Flow: Chaos experiment + Observability -->
+    <bpmn:serviceTask id="Task_InjectFault" name="Inject fault (Agent)" camunda:type="external" camunda:topic="agent.inject_fault">
+      <bpmn:incoming>Flow_ParallelToChaos</bpmn:incoming>
+      <bpmn:outgoing>Flow_ChaosToSLO</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="fault_type">network_delay</camunda:inputParameter>
+          <camunda:inputParameter name="duration">30s</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:intermediateCatchEvent id="Event_SLO_Alert" name="SLO Alert (Prometheus)">
+      <bpmn:incoming>Flow_ChaosToSLO</bpmn:incoming>
+      <bpmn:outgoing>Flow_SLOToGateway</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_SLO_Breach" />
+    </bpmn:intermediateCatchEvent>
+
+    <bpmn:exclusiveGateway id="Gateway_SLO" name="SLO breached?">
+      <bpmn:incoming>Flow_SLOToGateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_SLOYesToAbort</bpmn:outgoing>
+      <bpmn:outgoing>Flow_SLONoToEnd</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:serviceTask id="Task_AbortExperiment" name="Abort experiment (Control Plane)" camunda:type="external" camunda:topic="control.abort_experiment">
+      <bpmn:incoming>Flow_SLOYesToAbort</bpmn:incoming>
+      <bpmn:outgoing>Flow_AbortToEnd</bpmn:outgoing>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Chaos" name="Chaos branch end">
+      <bpmn:incoming>Flow_SLONoToEnd</bpmn:incoming>
+      <bpmn:incoming>Flow_AbortToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- Load testing branch (k6) -->
+    <bpmn:serviceTask id="Task_K6Start" name="Run k6 load test" camunda:type="external" camunda:topic="k6.run_test">
+      <bpmn:incoming>Flow_ParallelToK6</bpmn:incoming>
+      <bpmn:outgoing>Flow_K6ToEnd</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:inputParameter name="target_url">http://localhost:5000/route</camunda:inputParameter>
+          <camunda:inputParameter name="vus">20</camunda:inputParameter>
+          <camunda:inputParameter name="duration">30s</camunda:inputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+    </bpmn:serviceTask>
+
+    <bpmn:endEvent id="EndEvent_Load" name="Load test end">
+      <bpmn:incoming>Flow_K6ToEnd</bpmn:incoming>
+    </bpmn:endEvent>
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_StartToParallel" sourceRef="StartEvent_TestApp" targetRef="Gateway_Parallel" />
+    <bpmn:sequenceFlow id="Flow_ParallelToGetItems" sourceRef="Gateway_Parallel" targetRef="Task_GetItems" />
+    <bpmn:sequenceFlow id="Flow_GetItemsToAdd" sourceRef="Task_GetItems" targetRef="Task_AddToCart" />
+    <bpmn:sequenceFlow id="Flow_AddToCheckout" sourceRef="Task_AddToCart" targetRef="Task_Checkout" />
+    <bpmn:sequenceFlow id="Flow_CheckoutToPay" sourceRef="Task_Checkout" targetRef="Task_ProcessPayment" />
+    <bpmn:sequenceFlow id="Flow_PayToEnd" sourceRef="Task_ProcessPayment" targetRef="EndEvent_OrderPaid" />
+
+    <bpmn:sequenceFlow id="Flow_ParallelToObs" sourceRef="Gateway_Parallel" targetRef="Task_ScrapeMetrics" />
+    <bpmn:sequenceFlow id="Flow_ObsToDash" sourceRef="Task_ScrapeMetrics" targetRef="Task_UpdateDashboard" />
+    <bpmn:sequenceFlow id="Flow_DashToLogs" sourceRef="Task_UpdateDashboard" targetRef="Task_CollectLogs" />
+    <bpmn:sequenceFlow id="Flow_LogsToObsEnd" sourceRef="Task_CollectLogs" targetRef="EndEvent_Obs" />
+
+    <bpmn:sequenceFlow id="Flow_ParallelToChaos" sourceRef="Gateway_Parallel" targetRef="Task_InjectFault" />
+    <bpmn:sequenceFlow id="Flow_ChaosToSLO" sourceRef="Task_InjectFault" targetRef="Event_SLO_Alert" />
+    <bpmn:sequenceFlow id="Flow_SLOToGateway" sourceRef="Event_SLO_Alert" targetRef="Gateway_SLO" />
+    <bpmn:sequenceFlow id="Flow_SLOYesToAbort" sourceRef="Gateway_SLO" targetRef="Task_AbortExperiment">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[${true}]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_SLONoToEnd" sourceRef="Gateway_SLO" targetRef="EndEvent_Chaos">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"><![CDATA[${false}]]></bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_AbortToEnd" sourceRef="Task_AbortExperiment" targetRef="EndEvent_Chaos" />
+
+    <bpmn:sequenceFlow id="Flow_ParallelToK6" sourceRef="Gateway_Parallel" targetRef="Task_K6Start" />
+    <bpmn:sequenceFlow id="Flow_K6ToEnd" sourceRef="Task_K6Start" targetRef="EndEvent_Load" />
+
+  </bpmn:process>
+
+    <!-- Messages -->
+    <bpmn:message id="Message_SLO_Breach" name="prometheus.alert.slo_breach" />
+
+  <!-- BPMN Diagram (simple layout) -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_TestApp">
+    <bpmndi:BPMNPlane id="BPMNPlane_TestApp" bpmnElement="test_app_process">
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_TestApp">
+        <dc:Bounds x="120" y="120" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ParGateway" bpmnElement="Gateway_Parallel">
+        <dc:Bounds x="200" y="115" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GetItems" bpmnElement="Task_GetItems">
+        <dc:Bounds x="280" y="90" width="160" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_AddToCart" bpmnElement="Task_AddToCart">
+        <dc:Bounds x="470" y="90" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Checkout" bpmnElement="Task_Checkout">
+        <dc:Bounds x="680" y="90" width="160" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ProcessPayment" bpmnElement="Task_ProcessPayment">
+        <dc:Bounds x="870" y="90" width="180" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndPaid" bpmnElement="EndEvent_OrderPaid">
+        <dc:Bounds x="1080" y="120" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_InjectFault" bpmnElement="Task_InjectFault">
+        <dc:Bounds x="280" y="260" width="200" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SLOEvent" bpmnElement="Event_SLO_Alert">
+        <dc:Bounds x="520" y="280" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GwSLO" bpmnElement="Gateway_SLO">
+        <dc:Bounds x="600" y="275" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Abort" bpmnElement="Task_AbortExperiment">
+        <dc:Bounds x="690" y="260" width="200" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndChaos" bpmnElement="EndEvent_Chaos">
+        <dc:Bounds x="920" y="280" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_StartToParallel" bpmnElement="Flow_StartToParallel">
+        <di:waypoint x="156" y="138" />
+        <di:waypoint x="200" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ParallelToGetItems" bpmnElement="Flow_ParallelToGetItems">
+        <di:waypoint x="250" y="140" />
+        <di:waypoint x="280" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_GetItemsToAdd" bpmnElement="Flow_GetItemsToAdd">
+        <di:waypoint x="440" y="130" />
+        <di:waypoint x="470" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_AddToCheckout" bpmnElement="Flow_AddToCheckout">
+        <di:waypoint x="650" y="130" />
+        <di:waypoint x="680" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_CheckoutToPay" bpmnElement="Flow_CheckoutToPay">
+        <di:waypoint x="840" y="130" />
+        <di:waypoint x="870" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_PayToEnd" bpmnElement="Flow_PayToEnd">
+        <di:waypoint x="1050" y="130" />
+        <di:waypoint x="1080" y="138" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_ParallelToChaos" bpmnElement="Flow_ParallelToChaos">
+        <di:waypoint x="225" y="165" />
+        <di:waypoint x="225" y="300" />
+        <di:waypoint x="280" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ChaosToSLO" bpmnElement="Flow_ChaosToSLO">
+        <di:waypoint x="480" y="300" />
+        <di:waypoint x="520" y="298" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_SLOToGateway" bpmnElement="Flow_SLOToGateway">
+        <di:waypoint x="556" y="298" />
+        <di:waypoint x="600" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_SLOYesToAbort" bpmnElement="Flow_SLOYesToAbort">
+        <di:waypoint x="650" y="300" />
+        <di:waypoint x="690" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_SLONoToEnd" bpmnElement="Flow_SLONoToEnd">
+        <di:waypoint x="625" y="325" />
+        <di:waypoint x="938" y="325" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_AbortToEnd" bpmnElement="Flow_AbortToEnd">
+        <di:waypoint x="890" y="300" />
+        <di:waypoint x="920" y="298" />
+      </bpmndi:BPMNEdge>
+
+      <!-- New Observability and k6 branches DI -->
+      <bpmndi:BPMNShape id="Shape_Scrape" bpmnElement="Task_ScrapeMetrics">
+        <dc:Bounds x="280" y="430" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Dash" bpmnElement="Task_UpdateDashboard">
+        <dc:Bounds x="530" y="430" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Logs" bpmnElement="Task_CollectLogs">
+        <dc:Bounds x="780" y="430" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndObs" bpmnElement="EndEvent_Obs">
+        <dc:Bounds x="1020" y="460" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_K6" bpmnElement="Task_K6Start">
+        <dc:Bounds x="280" y="560" width="220" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndK6" bpmnElement="EndEvent_Load">
+        <dc:Bounds x="520" y="590" width="36" height="36" />
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_ParallelToObs" bpmnElement="Flow_ParallelToObs">
+        <di:waypoint x="225" y="165" />
+        <di:waypoint x="225" y="470" />
+        <di:waypoint x="280" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_ObsToDash" bpmnElement="Flow_ObsToDash">
+        <di:waypoint x="500" y="470" />
+        <di:waypoint x="530" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_DashToLogs" bpmnElement="Flow_DashToLogs">
+        <di:waypoint x="750" y="470" />
+        <di:waypoint x="780" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_LogsToObsEnd" bpmnElement="Flow_LogsToObsEnd">
+        <di:waypoint x="1000" y="470" />
+        <di:waypoint x="1020" y="478" />
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="Edge_Flow_ParallelToK6" bpmnElement="Flow_ParallelToK6">
+        <di:waypoint x="225" y="165" />
+        <di:waypoint x="225" y="600" />
+        <di:waypoint x="280" y="600" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_K6ToEnd" bpmnElement="Flow_K6ToEnd">
+        <di:waypoint x="500" y="600" />
+        <di:waypoint x="520" y="608" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>
