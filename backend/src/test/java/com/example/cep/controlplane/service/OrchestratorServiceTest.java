@@ -125,6 +125,9 @@ class OrchestratorServiceTest {
         String runId = runPlan.getRunId();
         RunState successOutcome = RunState.COMPLETED;
 
+        // Mock repository to return the run plan when queried
+        when(experimentRepository.findRunPlan(runId)).thenReturn(runPlan);
+
         // Mock SLO evaluator to return good metrics (no breaches)
         Map<String, Object> sloResults = new HashMap<>();
         sloResults.put("latency_p95", 350.0);  // Below threshold of 500
@@ -171,6 +174,9 @@ class OrchestratorServiceTest {
 
         String runId = runPlan.getRunId();
         RunState originalOutcome = RunState.COMPLETED;  // Agent thinks it completed successfully
+
+        // Mock repository to return the run plan when queried
+        when(experimentRepository.findRunPlan(runId)).thenReturn(runPlan);
 
         // Mock SLO evaluator to return metrics showing a BREACH
         Map<String, Object> sloResults = new HashMap<>();

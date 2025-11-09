@@ -7,9 +7,15 @@ public class RunPlan {
     private Instant scheduledAt;
     private boolean dryRun;
 
-    public RunPlan(String runId, ExperimentDefinition definition, Instant scheduledAt, boolean dryRun) {}
-    public String getRunId() { return null; }
-    public ExperimentDefinition getDefinition() { return null; }
-    public Instant getScheduledAt() { return null; }
-    public boolean isDryRun() { return false; }
+    public RunPlan(String runId, ExperimentDefinition definition, Instant scheduledAt, boolean dryRun) {
+        this.runId = runId;
+        this.definition = definition;
+        this.scheduledAt = scheduledAt;
+        this.dryRun = dryRun;
+    }
+
+    public String getRunId() { return runId; }
+    public ExperimentDefinition getDefinition() { return definition; }
+    public Instant getScheduledAt() { return scheduledAt; }
+    public boolean isDryRun() { return dryRun; }
 }

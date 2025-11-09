@@ -4,9 +4,16 @@ public class SloTarget {
     private String promQuery;
     private double threshold;
     private String comparator;
-    public SloTarget(SloMetric metric, String promQuery, double threshold, String comparator) {}
-    public SloMetric getMetric() { return null; }
-    public String getPromQuery() { return null; }
-    public double getThreshold() { return 0; }
-    public String getComparator() { return null; }
+
+    public SloTarget(SloMetric metric, String promQuery, double threshold, String comparator) {
+        this.metric = metric;
+        this.promQuery = promQuery;
+        this.threshold = threshold;
+        this.comparator = comparator;
+    }
+
+    public SloMetric getMetric() { return metric; }
+    public String getPromQuery() { return promQuery; }
+    public double getThreshold() { return threshold; }
+    public String getComparator() { return comparator; }
 }

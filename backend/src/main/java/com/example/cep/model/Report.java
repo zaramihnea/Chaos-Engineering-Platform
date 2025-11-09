@@ -11,11 +11,19 @@ public class Report {
     private Map<String,Object> sloDeltas;
 
     public Report(String runId, String experimentName, Instant startedAt, Instant endedAt,
-                  RunState outcome, Map<String,Object> sloDeltas) {}
-    public String getRunId() { return null; }
-    public String getExperimentName() { return null; }
-    public Instant getStartedAt() { return null; }
-    public Instant getEndedAt() { return null; }
-    public RunState getOutcome() { return null; }
-    public Map<String,Object> getSloDeltas() { return null; }
+                  RunState outcome, Map<String,Object> sloDeltas) {
+        this.runId = runId;
+        this.experimentName = experimentName;
+        this.startedAt = startedAt;
+        this.endedAt = endedAt;
+        this.outcome = outcome;
+        this.sloDeltas = sloDeltas;
+    }
+
+    public String getRunId() { return runId; }
+    public String getExperimentName() { return experimentName; }
+    public Instant getStartedAt() { return startedAt; }
+    public Instant getEndedAt() { return endedAt; }
+    public RunState getOutcome() { return outcome; }
+    public Map<String,Object> getSloDeltas() { return sloDeltas; }
 }

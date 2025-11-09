@@ -16,14 +16,25 @@ public class ExperimentDefinition {
 
     public ExperimentDefinition(String id, String name, FaultType faultType, Map<String,Object> parameters,
                                 TargetSystem target, Duration timeout, List<SloTarget> slos,
-                                boolean dryRunAllowed, String createdBy) {}
-    public String getId() { return null; }
-    public String getName() { return null; }
-    public FaultType getFaultType() { return null; }
-    public Map<String,Object> getParameters() { return null; }
-    public TargetSystem getTarget() { return null; }
-    public Duration getTimeout() { return null; }
-    public List<SloTarget> getSlos() { return null; }
-    public boolean isDryRunAllowed() { return false; }
-    public String getCreatedBy() { return null; }
+                                boolean dryRunAllowed, String createdBy) {
+        this.id = id;
+        this.name = name;
+        this.faultType = faultType;
+        this.parameters = parameters;
+        this.target = target;
+        this.timeout = timeout;
+        this.slos = slos;
+        this.dryRunAllowed = dryRunAllowed;
+        this.createdBy = createdBy;
+    }
+
+    public String getId() { return id; }
+    public String getName() { return name; }
+    public FaultType getFaultType() { return faultType; }
+    public Map<String,Object> getParameters() { return parameters; }
+    public TargetSystem getTarget() { return target; }
+    public Duration getTimeout() { return timeout; }
+    public List<SloTarget> getSlos() { return slos; }
+    public boolean isDryRunAllowed() { return dryRunAllowed; }
+    public String getCreatedBy() { return createdBy; }
 }
