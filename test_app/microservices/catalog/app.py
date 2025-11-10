@@ -1,12 +1,19 @@
 from flask import Flask, jsonify, request
 from microservices.catalog.catalog_service import CatalogService
 from aop.logging_aspect import LoggingAspect
+from aop.health_info_aspect import HealthInfoAspect
 
 class CatalogApp:
     def __init__(self):
         self.app = Flask(__name__)
         self.service = CatalogService("catalog", 5001)
         self.aspect = LoggingAspect()
+        self.aspect.apply_to_public_methods(
+            self.service,
+            include=["list_items", "get_item"],
+        )
+        self.health = HealthInfoAspect(self.service, version="1.0.0")
+        self.health.apply_to_public_methods(self.service, include=["list_items", "get_item"])
 
     def setup_routes(self):
         @self.app.route("/items", methods=["GET"])
@@ -26,6 +33,14 @@ class CatalogApp:
         def metrics():
             # Placeholder metrics endpoint for iteration 2
             return "# metrics\n", 200
+
+        @self.app.route("/health", methods=["GET"])
+        def health_check():
+            return jsonify(self.health.get_health()), 200
+
+        @self.app.route("/info", methods=["GET"])
+        def info():
+            return jsonify(self.health.get_info()), 200
 
     def start(self):
         self.app.run(host="0.0.0.0", port=5001)
