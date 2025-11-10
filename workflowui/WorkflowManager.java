@@ -28,4 +28,14 @@ public class WorkflowManager {
         System.out.println("Workflow is executing...");
     }
     public void abortWorkflow(Workflow workflow) {}
+
+    // minimal code to make the WorkflowManagerTest pass
+    public void registerWorkflow(Workflow workflow) {
+        workflows.add(workflow);
+    }
+
+    public List<Workflow> getWorkflows() {
+        return workflows;
+    }
 }
+

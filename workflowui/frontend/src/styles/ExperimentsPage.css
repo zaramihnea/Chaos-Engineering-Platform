@@ -1,0 +1,122 @@
+.exp-container {
+  padding: 30px;
+  color: #333;
+}
+
+.exp-title {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.exp-description {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.exp-content {
+  display: flex;
+  gap: 20px;
+}
+
+
+.exp-left {
+  width: 65%;
+}
+
+.exp-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.exp-filters input,
+.exp-filters select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.query-btn {
+  background: #0077ff;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.new-exp-btn {
+  background: #00a86b;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.exp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.exp-table th,
+.exp-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 10px;
+}
+
+.paused-badge {
+  background: #afa58e;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: black;
+}
+
+.detail-btn {
+  background: none;
+  border: none;
+  color: #0077ff;
+  cursor: pointer;
+}
+
+.exp-right {
+  width: 30%;
+}
+
+.exp-summary {
+  background: rgb(99, 94, 94);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.donut-chart {
+  width: 150px;
+  height: 150px;
+  border: 12px solid #4ea4ff;
+  border-left-color: #a3d3ff;
+  border-right-color: #cff4ff;
+  border-radius: 50%;
+  margin: 20px auto;
+  position: relative;
+}
+
+.inner {
+  position: absolute;
+  top: 40%;
+  left: 42%;
+  font-size: 1.3rem;
+}
+
+.exp-events {
+  background: rgb(99, 94, 94);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.exp-events ul {
+  padding-left: 18px;
+}

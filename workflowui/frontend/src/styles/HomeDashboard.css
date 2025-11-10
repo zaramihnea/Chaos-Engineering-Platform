@@ -1,0 +1,35 @@
+.home-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.home-container {
+  text-align: center;
+}
+
+.home-title {
+  font-size: 2.5rem;
+}
+
+.home-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.home-card {
+  background: gray;
+  padding: 20px;
+  border-radius: 12px;
+  width: 200px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}

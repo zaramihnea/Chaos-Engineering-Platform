@@ -9,7 +9,7 @@ public class Workflow {
     private List<WorkflowStep> steps;
     private List<Dependency> dependencies;
 
-    public void addSteps(WorkflowStep step) {}
+
     public void configureParameters(Parameter parameter) {}
     public void defineDependencies(Dependency dependency) {}
     public void run() {}
