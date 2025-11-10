@@ -37,3 +37,14 @@
 		- `test_http_payment_process_marks_paid` – creates an order, POST `/payment/process`, asserts response and DB mark paid.
 	- `tests/test_gateway_http.py` (user `gary`):
 		- `test_http_gateway_route_checkout_and_pay` – via `POST /route` add item then `checkout_and_pay`; expects `status='paid'` and `order_id`.
+
+## Iteration 3 (AOP: Logging Aspect)
+
+- Aspect:
+	- `aop/logging_aspect.py`
+	- `aop/health_info_aspect.py`
+	- `aop/validation_aspecy.py`
+
+- Test:
+	- `tests/test_logging_aspect.py`
+	- `tests/test_validation_aspect.py`

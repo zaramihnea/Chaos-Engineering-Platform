@@ -1,12 +1,19 @@
 from flask import Flask, jsonify, request
 from microservices.payment.payment_service import PaymentService
 from aop.logging_aspect import LoggingAspect
+from aop.health_info_aspect import HealthInfoAspect
 
 class PaymentApp:
     def __init__(self):
         self.app = Flask(__name__)
         self.service = PaymentService("payment", 5003)
         self.aspect = LoggingAspect()
+        self.aspect.apply_to_public_methods(
+            self.service,
+            include=["process_payment", "refund_payment"],
+        )
+        self.health = HealthInfoAspect(self.service, version="1.0.0")
+        self.health.apply_to_public_methods(self.service, include=["process_payment", "refund_payment"])
 
     def setup_routes(self):
         @self.app.route("/payment/process", methods=["POST"])
@@ -37,7 +44,11 @@ class PaymentApp:
 
         @self.app.route("/health", methods=["GET"])
         def health_check():
-            return jsonify({"status": "ok"}), 200
+            return jsonify(self.health.get_health()), 200
+
+        @self.app.route("/info", methods=["GET"])
+        def info():
+            return jsonify(self.health.get_info()), 200
 
     def start(self):
         self.app.run(host="0.0.0.0", port=5003)

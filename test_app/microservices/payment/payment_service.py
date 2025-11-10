@@ -4,12 +4,6 @@ from common import env as _env
 
 class PaymentService(BaseService):
     def process_payment(self, user_id: str, amount: float) -> bool:
-        """Process payment for the most recent 'created' order of a user.
-        
-        - Find the latest order with status 'created' for the given user.
-        - Insert a succeeded payment linked to that order for the provided amount.
-        - Mark the order as 'paid'.
-        """
         from common.db import get_conn
 
         with get_conn() as conn:
@@ -23,7 +17,6 @@ class PaymentService(BaseService):
                     raise ValueError("No order to pay for user")
                 order_id, total_amount = row
 
-                # In a real system we'd authorize/capture with provider; here we trust amount
                 cur.execute(
                     "INSERT INTO payments (order_id, amount, currency, provider, provider_ref, status) VALUES (%s, %s, 'USD', 'mock', 'auto', 'succeeded') RETURNING id;",
                     (order_id, amount),

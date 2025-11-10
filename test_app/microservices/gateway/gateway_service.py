@@ -12,7 +12,6 @@ class GatewayService(BaseService):
         self.payment = PaymentService("payment", 5003)
 
     def route_request(self, service_name: str, endpoint: str, payload: dict):
-        """Simple router."""
         if service_name == "catalog" and endpoint == "list_items":
             return self.catalog.list_items()
         if service_name == "catalog" and endpoint == "get_item":
