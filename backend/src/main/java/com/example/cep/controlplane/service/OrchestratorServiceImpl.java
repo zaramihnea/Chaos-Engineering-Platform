@@ -1,5 +1,7 @@
 package com.example.cep.controlplane.service;
 
+import com.example.cep.aop.annotations.ValidateSlo;
+import com.example.cep.aop.annotations.ValidationPhase;
 import com.example.cep.controlplane.store.ExperimentRepository;
 import com.example.cep.model.*;
 import org.springframework.stereotype.Service;
@@ -77,10 +79,29 @@ public class OrchestratorServiceImpl implements OrchestratorService {
      * 3. Dispatch to agent (simulated for now)
      * 4. Return run ID for tracking
      *
+     * AOP Integration:
+     * - @ValidateSlo annotation triggers SloValidationAspect
+     * - BEFORE_EXECUTION phase validates baseline SLOs
+     * - Prevents experiments from running on already degraded systems
+     * - Throws SloBreachException if baseline SLOs are breached
+     *
+     * This is a perfect example of cross-cutting concerns:
+     * - Business logic focuses on orchestration
+     * - AOP aspect handles SLO validation
+     * - Clean separation of concerns
+     *
      * @param plan The run plan containing experiment definition and scheduling
      * @return Run ID for tracking execution
+     * @throws com.example.cep.aop.aspects.SloValidationAspect.SloBreachException
+     *         if baseline SLOs are breached
      */
     @Override
+    @ValidateSlo(
+        phase = ValidationPhase.BEFORE_EXECUTION,
+        abortOnBreach = true,
+        breachMessage = "Cannot start experiment - baseline SLOs are already breached",
+        logResults = true
+    )
     public String dispatch(RunPlan plan) {
         String runId = plan.getRunId();
 

@@ -44,11 +44,26 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- AspectJ Runtime for AOP -->
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
             <version>${aspectj.version}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- AspectJ Weaver for Load-Time Weaving (LTW) -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Spring AOP for @Aspect support -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
         <dependency>

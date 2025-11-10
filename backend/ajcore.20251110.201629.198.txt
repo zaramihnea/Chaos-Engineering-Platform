@@ -1,0 +1,252 @@
+---- AspectJ Properties ---
+AspectJ Compiler 1.9.22 built on Saturday Mar 23, 2024 at 09:58:15 PDT
+---- Dump Properties ---
+Dump file: ajcore.20251110.201629.198.txt
+Dump reason: java.lang.NegativeArraySizeException
+Dump on exception: true
+Dump at exit condition: abort
+---- Exception Information ---
+java.lang.NegativeArraySizeException: -2
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeLocationContext(EclipseAdapterUtils.java:121)
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeSourceLocation(EclipseAdapterUtils.java:139)
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeMessage(EclipseAdapterUtils.java:152)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager$4.acceptResult(AjBuildManager.java:1189)
+	at org.aspectj.ajdt.internal.compiler.AjPipeliningCompilerAdapter.acceptResult(AjPipeliningCompilerAdapter.java:459)
+	at org.aspectj.ajdt.internal.compiler.AjPipeliningCompilerAdapter.afterProcessing(AjPipeliningCompilerAdapter.java:429)
+	at org.aspectj.ajdt.internal.compiler.CompilerAdapter.ajc$after$org_aspectj_ajdt_internal_compiler_CompilerAdapter$5$6b855184(CompilerAdapter.aj:104)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.process(Compiler.java:945)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.processCompiledUnits(Compiler.java:575)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:475)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:426)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.performCompilation(AjBuildManager.java:1101)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.performBuild(AjBuildManager.java:275)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.batchBuild(AjBuildManager.java:188)
+	at org.aspectj.ajdt.ajc.AjdtCommand.doCommand(AjdtCommand.java:103)
+	at org.aspectj.ajdt.ajc.AjdtCommand.runCommand(AjdtCommand.java:47)
+	at org.aspectj.tools.ajc.Main.run(Main.java:385)
+	at org.aspectj.tools.ajc.Main.runMain(Main.java:274)
+	at org.codehaus.mojo.aspectj.AbstractAjcCompiler.execute(AbstractAjcCompiler.java:568)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:126)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2(MojoExecutor.java:328)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute(MojoExecutor.java:316)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:212)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:174)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.access$000(MojoExecutor.java:75)
+	at org.apache.maven.lifecycle.internal.MojoExecutor$1.run(MojoExecutor.java:162)
+	at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute(DefaultMojosExecutionStrategy.java:39)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:159)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:105)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:73)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:53)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:118)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:261)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:173)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:101)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:906)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:283)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:206)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:255)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:201)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:361)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:314)
+---- System Properties ---
+java.specification.version=21
+sun.jnu.encoding=UTF-8
+java.class.path=/Users/zaramihnea/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/boot/plexus-classworlds-2.9.0.jar
+java.vm.vendor=Eclipse Adoptium
+sun.arch.data.model=64
+java.vendor.url=https://adoptium.net/
+user.timezone=Europe/Bucharest
+maven.conf=/Users/zaramihnea/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/conf
+java.vm.specification.version=21
+os.name=Mac OS X
+sun.java.launcher=SUN_STANDARD
+user.country=US
+sun.boot.library.path=/Users/zaramihnea/.sdkman/candidates/java/21-tem/lib
+sun.java.command=org.codehaus.plexus.classworlds.launcher.Launcher clean compile
+jdk.debug=release
+maven.home=/Users/zaramihnea/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15
+sun.cpu.endian=little
+user.home=/Users/zaramihnea
+user.language=en
+java.specification.vendor=Oracle Corporation
+java.version.date=2023-09-19
+java.home=/Users/zaramihnea/.sdkman/candidates/java/21-tem
+file.separator=/
+java.vm.compressedOopsMode=Zero based
+line.separator=
+
+java.vm.specification.vendor=Oracle Corporation
+java.specification.name=Java Platform API Specification
+apple.awt.application.name=Launcher
+sun.management.compiler=HotSpot 64-Bit Tiered Compilers
+java.runtime.version=21+35-LTS
+user.name=zaramihnea
+stdout.encoding=UTF-8
+path.separator=:
+os.version=26.2
+java.runtime.name=OpenJDK Runtime Environment
+file.encoding=UTF-8
+guice.disable.misplaced.annotation.check=true
+java.vm.name=OpenJDK 64-Bit Server VM
+java.vendor.version=Temurin-21+35
+java.vendor.url.bug=https://github.com/adoptium/adoptium-support/issues
+java.io.tmpdir=/var/folders/hx/xzt7c9yx7m772tkrwghw_fym0000gn/T/
+java.version=21
+user.dir=/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend
+os.arch=aarch64
+maven.multiModuleProjectDirectory=/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend
+java.vm.specification.name=Java Virtual Machine Specification
+native.encoding=UTF-8
+java.library.path=/Users/zaramihnea/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:.
+java.vm.info=mixed mode
+stderr.encoding=UTF-8
+java.vendor=Eclipse Adoptium
+java.vm.version=21+35-LTS
+classworlds.conf=/Users/zaramihnea/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/bin/m2.conf
+sun.io.unicode.encoding=UnicodeBig
+library.jansi.path=/Users/zaramihnea/.m2/wrapper/dists/apache-maven-3.9.11/a2d47e15/lib/jansi-native
+java.class.version=65.0
+---- Command Line ---
+-Xajruntimetarget:1.5
+-17
+-encoding
+UTF-8
+-source
+17
+-target
+17
+-classpath
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter/3.5.7/spring-boot-starter-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot/3.5.7/spring-boot-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-context/6.2.12/spring-context-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-expression/6.2.12/spring-expression-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.5.7/spring-boot-autoconfigure-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.5.7/spring-boot-starter-logging-3.5.7.jar:/Users/zaramihnea/.m2/repository/ch/qos/logback/logback-classic/1.5.20/logback-classic-1.5.20.jar:/Users/zaramihnea/.m2/repository/ch/qos/logback/logback-core/1.5.20/logback-core-1.5.20.jar:/Users/zaramihnea/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/zaramihnea/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/zaramihnea/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar:/Users/zaramihnea/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-core/6.2.12/spring-core-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-jcl/6.2.12/spring-jcl-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/yaml/snakeyaml/2.4/snakeyaml-2.4.jar:/Users/zaramihnea/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar:/Users/zaramihnea/.m2/repository/org/aspectj/aspectjrt/1.9.22/aspectjrt-1.9.22.jar:/Users/zaramihnea/.m2/repository/org/aspectj/aspectjweaver/1.9.22/aspectjweaver-1.9.22.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.5.7/spring-boot-starter-aop-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-aop/6.2.12/spring-aop-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/springframework/spring-beans/6.2.12/spring-beans-6.2.12.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.5.7/spring-boot-starter-actuator-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.5.7/spring-boot-actuator-autoconfigure-3.5.7.jar:/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-actuator/3.5.7/spring-boot-actuator-3.5.7.jar:/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-observation/1.15.5/micrometer-observation-1.15.5.jar:/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-commons/1.15.5/micrometer-commons-1.15.5.jar:/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-jakarta9/1.15.5/micrometer-jakarta9-1.15.5.jar:/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-core/1.15.5/micrometer-core-1.15.5.jar:/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/target/classes
+-d
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/target/classes
+-s
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/target/generated-sources/aspectj-maven-plugin
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/config/AopConfig.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/security/AuthContext.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/security/AccessControl.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/security/CorsConfig.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/integration/MockPrometheusClient.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/integration/PrometheusClient.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/annotations/ValidationPhase.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/annotations/ValidateSlo.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/annotations/MonitorSlo.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/service/SloViolationHandler.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/aspects/SloValidationAspect.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/aspects/SloMonitoringAspect.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/api/ControlPlaneApiImpl.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/api/ControlPlaneApi.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/OrchestratorServiceImpl.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/PolicyService.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/PolicyServiceImpl.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/SloEvaluator.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/SloEvaluatorImpl.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/ApprovalService.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/service/OrchestratorService.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/store/InMemoryExperimentRepository.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/controlplane/store/ExperimentRepository.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/SloTarget.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/ExperimentDefinition.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/RunPlan.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/TargetSystem.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/SloMetric.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/FaultType.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/Report.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/RunState.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/Workflow.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/model/WorkflowStep.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/BackendApplication.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/event/Subject.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/event/RunEventBus.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/event/Observer.java
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/aspect/com/example/cep/aop/PolicyAspect.aj
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/aspect/com/example/cep/aop/LoggingAspect.aj
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/aspect/com/example/cep/aop/SloGuardAspect.aj
+---- Full Classpath ---
+/Users/zaramihnea/.sdkman/candidates/java/21-tem/lib/jrt-fs.jar(110830 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter/3.5.7/spring-boot-starter-3.5.7.jar(4768 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot/3.5.7/spring-boot-3.5.7.jar(1900579 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-context/6.2.12/spring-context-6.2.12.jar(1358015 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-expression/6.2.12/spring-expression-6.2.12.jar(317835 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.5.7/spring-boot-autoconfigure-3.5.7.jar(2084226 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.5.7/spring-boot-starter-logging-3.5.7.jar(4758 bytes)
+/Users/zaramihnea/.m2/repository/ch/qos/logback/logback-classic/1.5.20/logback-classic-1.5.20.jar(307222 bytes)
+/Users/zaramihnea/.m2/repository/ch/qos/logback/logback-core/1.5.20/logback-core-1.5.20.jar(635627 bytes)
+/Users/zaramihnea/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar(23834 bytes)
+/Users/zaramihnea/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar(348513 bytes)
+/Users/zaramihnea/.m2/repository/org/slf4j/jul-to-slf4j/2.0.17/jul-to-slf4j-2.0.17.jar(6349 bytes)
+/Users/zaramihnea/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar(26141 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-core/6.2.12/spring-core-6.2.12.jar(1969697 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-jcl/6.2.12/spring-jcl-6.2.12.jar(24541 bytes)
+/Users/zaramihnea/.m2/repository/org/yaml/snakeyaml/2.4/snakeyaml-2.4.jar(339825 bytes)
+/Users/zaramihnea/.m2/repository/org/slf4j/slf4j-api/2.0.17/slf4j-api-2.0.17.jar(69908 bytes)
+/Users/zaramihnea/.m2/repository/org/aspectj/aspectjrt/1.9.22/aspectjrt-1.9.22.jar(126610 bytes)
+/Users/zaramihnea/.m2/repository/org/aspectj/aspectjweaver/1.9.22/aspectjweaver-1.9.22.jar(2179164 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-aop/3.5.7/spring-boot-starter-aop-3.5.7.jar(4769 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-aop/6.2.12/spring-aop-6.2.12.jar(420268 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/spring-beans/6.2.12/spring-beans-6.2.12.jar(890323 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-starter-actuator/3.5.7/spring-boot-starter-actuator-3.5.7.jar(4807 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-actuator-autoconfigure/3.5.7/spring-boot-actuator-autoconfigure-3.5.7.jar(842732 bytes)
+/Users/zaramihnea/.m2/repository/org/springframework/boot/spring-boot-actuator/3.5.7/spring-boot-actuator-3.5.7.jar(703758 bytes)
+/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-observation/1.15.5/micrometer-observation-1.15.5.jar(75054 bytes)
+/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-commons/1.15.5/micrometer-commons-1.15.5.jar(49213 bytes)
+/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-jakarta9/1.15.5/micrometer-jakarta9-1.15.5.jar(32830 bytes)
+/Users/zaramihnea/.m2/repository/io/micrometer/micrometer-core/1.15.5/micrometer-core-1.15.5.jar(864654 bytes)
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/target/classes(3 entries)
+---- Compiler Messages ---
+info Pipelining compilation
+info compiling /Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/aspects/SloValidationAspect.java
+error at
+"(validateSlo.phase() == T(com.example.cep.aop.annotations.ValidationPhase).BEFORE_EXECUTION)")
+    ^
+/Users/zaramihnea/Developer/Uni/Master/ASET/Chaos-Engineering-Platform/backend/src/main/java/com/example/cep/aop/aspects/SloValidationAspect.java:123:0::0 Syntax error on token "@annotation(validateSlo) && (validateSlo.phase() == T(com.example.cep.aop.annotations.ValidationPhase).BEFORE_EXECUTION)", ")" expected
+abort ABORT -- (NegativeArraySizeException) -2
+-2
+java.lang.NegativeArraySizeException: -2
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeLocationContext(EclipseAdapterUtils.java:121)
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeSourceLocation(EclipseAdapterUtils.java:139)
+	at org.aspectj.ajdt.internal.core.builder.EclipseAdapterUtils.makeMessage(EclipseAdapterUtils.java:152)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager$4.acceptResult(AjBuildManager.java:1189)
+	at org.aspectj.ajdt.internal.compiler.AjPipeliningCompilerAdapter.acceptResult(AjPipeliningCompilerAdapter.java:459)
+	at org.aspectj.ajdt.internal.compiler.AjPipeliningCompilerAdapter.afterProcessing(AjPipeliningCompilerAdapter.java:429)
+	at org.aspectj.ajdt.internal.compiler.CompilerAdapter.ajc$after$org_aspectj_ajdt_internal_compiler_CompilerAdapter$5$6b855184(CompilerAdapter.aj:104)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.process(Compiler.java:945)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.processCompiledUnits(Compiler.java:575)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:475)
+	at org.aspectj.org.eclipse.jdt.internal.compiler.Compiler.compile(Compiler.java:426)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.performCompilation(AjBuildManager.java:1101)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.performBuild(AjBuildManager.java:275)
+	at org.aspectj.ajdt.internal.core.builder.AjBuildManager.batchBuild(AjBuildManager.java:188)
+	at org.aspectj.ajdt.ajc.AjdtCommand.doCommand(AjdtCommand.java:103)
+	at org.aspectj.ajdt.ajc.AjdtCommand.runCommand(AjdtCommand.java:47)
+	at org.aspectj.tools.ajc.Main.run(Main.java:385)
+	at org.aspectj.tools.ajc.Main.runMain(Main.java:274)
+	at org.codehaus.mojo.aspectj.AbstractAjcCompiler.execute(AbstractAjcCompiler.java:568)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:126)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2(MojoExecutor.java:328)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute(MojoExecutor.java:316)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:212)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:174)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.access$000(MojoExecutor.java:75)
+	at org.apache.maven.lifecycle.internal.MojoExecutor$1.run(MojoExecutor.java:162)
+	at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute(DefaultMojosExecutionStrategy.java:39)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:159)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:105)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:73)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:53)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:118)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:261)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:173)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:101)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:906)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:283)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:206)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:255)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:201)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:361)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:314)
+
