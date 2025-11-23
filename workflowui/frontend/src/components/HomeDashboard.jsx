@@ -10,7 +10,7 @@ export default function HomeDashboard() {
       <div className="home-container">
         <h1 className="home-title">Chaos Engineering Platform</h1>
         <p className="home-subtitle">
-          Welcome! Select an option to begin with:
+          Welcome! This is the overview of your activity on this platform:
         </p>
 
         <div className="home-grid">
