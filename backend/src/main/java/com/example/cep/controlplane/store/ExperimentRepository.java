@@ -6,6 +6,7 @@ public interface ExperimentRepository {
     void saveDefinition(ExperimentDefinition def);
     ExperimentDefinition findById(String id);
     List<ExperimentDefinition> findAll();
+    void deleteById(String id);
     void saveRunPlan(RunPlan plan);
     RunPlan findRunPlan(String runId);
     void saveReport(Report report);

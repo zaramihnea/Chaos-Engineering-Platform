@@ -28,6 +28,7 @@ import java.util.Map;
  * Endpoints:
  * - POST   /api/experiments           - Create new experiment
  * - GET    /api/experiments           - List all experiments
+ * - DELETE /api/experiments/{id}      - Delete experiment
  * - POST   /api/experiments/{id}/runs - Schedule experiment run
  * - GET    /api/runs/{runId}/state    - Get run state
  * - GET    /api/runs/{runId}/report   - Get run report
@@ -105,6 +106,39 @@ public class ExperimentController {
     public ResponseEntity<List<ExperimentDefinition>> listExperiments() {
         List<ExperimentDefinition> experiments = controlPlaneApi.listExperiments();
         return ResponseEntity.ok(experiments);
+    }
+
+    /**
+     * Delete an experiment
+     *
+     * DELETE /api/experiments/{id}
+     *
+     * @param id The experiment ID
+     * @return Response confirming deletion
+     */
+    @Operation(
+        summary = "Delete an experiment",
+        description = "Deletes an experiment definition from the system. This allows the experiment ID to be reused."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Experiment deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Experiment not found")
+    })
+    @DeleteMapping("/experiments/{id}")
+    public ResponseEntity<Map<String, String>> deleteExperiment(
+            @Parameter(description = "Experiment ID", required = true)
+            @PathVariable String id) {
+        try {
+            controlPlaneApi.deleteExperiment(id);
+            return ResponseEntity.ok(Map.of(
+                "experimentId", id,
+                "message", "Experiment deleted successfully"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**

@@ -10,6 +10,7 @@ public interface ControlPlaneApi {
     Report getReport(String runId);
     RunState getRunState(String runId);
     List<ExperimentDefinition> listExperiments();
+    void deleteExperiment(String experimentId);
     String approveExperiment(String experimentId, String approver);
     boolean validatePolicy(ExperimentDefinition def);
 }

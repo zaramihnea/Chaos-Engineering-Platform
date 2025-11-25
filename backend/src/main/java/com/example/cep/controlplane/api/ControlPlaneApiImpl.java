@@ -227,6 +227,25 @@ public class ControlPlaneApiImpl implements ControlPlaneApi {
     }
 
     /**
+     * Deletes an experiment definition from the system
+     *
+     * @param experimentId The ID of the experiment to delete
+     * @throws ExperimentNotFoundException if experiment ID is invalid
+     */
+    @Override
+    public void deleteExperiment(String experimentId) {
+        ExperimentDefinition definition = experimentRepository.findById(experimentId);
+        if (definition == null) {
+            throw new ExperimentNotFoundException(
+                "Cannot delete: Experiment with ID '" + experimentId + "' not found."
+            );
+        }
+
+        experimentRepository.deleteById(experimentId);
+        System.out.println("Deleted experiment: " + experimentId + " (" + definition.getName() + ")");
+    }
+
+    /**
      * Approves an experiment for execution
      *
      * Used for experiments requiring elevated privileges (e.g., NETWORK_PARTITION)

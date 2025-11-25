@@ -36,6 +36,11 @@ public class InMemoryExperimentRepository implements ExperimentRepository {
     }
 
     @Override
+    public void deleteById(String id) {
+        definitions.remove(id);
+    }
+
+    @Override
     public void saveRunPlan(RunPlan plan) {
         runPlans.put(plan.getRunId(), plan);
     }

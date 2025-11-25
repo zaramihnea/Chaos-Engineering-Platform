@@ -32,9 +32,10 @@ public class MockPrometheusClient implements PrometheusClient {
         Map<String, Object> resultItem = new HashMap<>();
 
         // Prometheus returns value as [timestamp, "value_string"]
+        // Return a low value (0.001) that won't breach typical SLO thresholds
         List<Object> valueArray = Arrays.asList(
             System.currentTimeMillis() / 1000.0,  // timestamp
-            "100.0"  // mock value
+            "0.001"  // mock value - low enough for latency/error rate SLOs
         );
 
         resultItem.put("value", valueArray);
