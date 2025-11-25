@@ -85,7 +85,7 @@
 }
 
 .exp-summary {
-  background: rgb(99, 94, 94);
+  background: gray;
   padding: 15px;
   border-radius: 10px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);

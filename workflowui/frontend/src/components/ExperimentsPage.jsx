@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import withLogging from "../aop/withLogging";
 import withActionLogging from "../aop/withActionLogging";
+import { useNavigate } from "react-router-dom";
 import "../styles/ExperimentsPage.css";
 
 function ExperimentsPage() {
+  const navigate = useNavigate();
   const [nameFilter, setNameFilter] = useState("");
   const [kindFilter, setKindFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -90,7 +92,12 @@ function ExperimentsPage() {
             <button className="query-btn" onClick={queryExperiments}>
               Query
             </button>
-            <button className="new-exp-btn">+ New Experiment</button>
+            <button
+        className="new-exp-btn"
+        onClick={() => navigate("/new-experiment")}
+      >
+        + New Experiment
+      </button>
           </div>
 
           <table className="exp-table">
@@ -116,7 +123,7 @@ function ExperimentsPage() {
                   </td>
                   <td>{exp.createdAt}</td>
                   <td>
-                    <button className="detail-btn">Detail</button>
+                    <button className="detail-btn">Details</button>
                   </td>
                 </tr>
               ))}

@@ -103,19 +103,23 @@ export default function WorkflowList() {
                   <td>{w.createdAt}</td>
                   <td>
                     <button
-                      className="detail-btn"
-                      onClick={() => navigate(`/workflow/${w.id}`)}
+                      onClick={() => {
+                        // mark navigation as intentional
+                        sessionStorage.setItem("workflow-nav-token", "true");
+
+                        // store the workflow ID (optional)
+                        sessionStorage.setItem("workflowId", w.id);
+
+                        navigate(`/workflow/${w.id}`);
+                      }}
                     >
-                      Detail
+                      Details
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <button className="back-button" onClick={() => navigate("/")}>
-            ← Back to Home
-          </button>
         </div>
 
         <div className="exp-right">

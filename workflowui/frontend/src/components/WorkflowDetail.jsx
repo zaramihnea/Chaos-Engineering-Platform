@@ -1,10 +1,12 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import useNavigationMonitor from "../mop/useNavigationMonitor";
 import "../styles/ExperimentsPage.css";
 
 export default function WorkflowDetail() {
-  const navigate = useNavigate();
   const { id } = useParams();
+
+  useNavigationMonitor();
 
   const workflow = {
     id,
@@ -57,9 +59,13 @@ export default function WorkflowDetail() {
 
   return (
     <div className="exp-container">
-      <button className="back-btn" onClick={() => navigate("/workflows")}>
-        ← Back to Workflows
-      </button>
+      <div className="top-nav">
+        <a className="back-link" href="/workflows">
+          ← Back to Workflows
+        </a>
+        <span className="divider">|</span>
+        <span className="back-link">{workflow.name}</span>
+      </div>
 
       <h1 className="exp-title">Workflow Details</h1>
       <p className="exp-description">

@@ -3,6 +3,16 @@ from common import env as _env  # noqa: F401
 
 
 class CartService(BaseService):
+    def __init__(self, name: str, port: int):
+        super().__init__(name, port)
+        # business metrics
+        self.checkout_counter = self.metrics.create_counter(
+            "checkout_total", "Number of successful checkouts"
+        )
+        self.checkout_amount_hist = self.metrics.create_histogram(
+            "checkout_amount", "Order amount at checkout"
+        )
+
     def add_to_cart(self, user_id: str, item_id: int):
         """Create or find an open cart for user and add/increment item."""
         from common.db import get_conn
@@ -113,4 +123,11 @@ class CartService(BaseService):
                 # Close cart
                 cur.execute("UPDATE carts SET status='checked_out' WHERE id=%s;", (cart_id,))
             conn.commit()
+        # record business metrics
+        try:
+            self.checkout_counter.labels(service=self.name).inc()
+            self.checkout_amount_hist.labels(service=self.name).observe(float(total))
+        except Exception:
+            pass
+
         return {"order_id": order_id, "status": "created", "total_amount": total}

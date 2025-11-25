@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from microservices.catalog.catalog_service import CatalogService
 from aop.logging_aspect import LoggingAspect
 from aop.health_info_aspect import HealthInfoAspect
+from aop.metrics_aspect import MetricsAspect
 
 class CatalogApp:
     def __init__(self):
@@ -9,6 +10,11 @@ class CatalogApp:
         self.service = CatalogService("catalog", 5001)
         self.aspect = LoggingAspect()
         self.aspect.apply_to_public_methods(
+            self.service,
+            include=["list_items", "get_item"],
+        )
+        self.metrics_aspect = MetricsAspect()
+        self.metrics_aspect.apply_to_public_methods(
             self.service,
             include=["list_items", "get_item"],
         )
@@ -31,8 +37,8 @@ class CatalogApp:
 
         @self.app.route("/metrics", methods=["GET"])
         def metrics():
-            # Placeholder metrics endpoint for iteration 2
-            return "# metrics\n", 200
+            body, content_type = self.service.export_metrics()
+            return body, 200, {"Content-Type": content_type}
 
         @self.app.route("/health", methods=["GET"])
         def health_check():
