@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from microservices.cart.cart_service import CartService
 from aop.logging_aspect import LoggingAspect
 from aop.health_info_aspect import HealthInfoAspect
+from aop.metrics_aspect import MetricsAspect
 
 class CartApp:
     def __init__(self):
@@ -9,6 +10,12 @@ class CartApp:
         self.service = CartService("cart", 5002)
         self.aspect = LoggingAspect()
         self.aspect.apply_to_public_methods(
+            self.service,
+            include=["get_cart", "add_to_cart", "checkout"],
+        )
+        # Metrics aspect: record latency and request counts
+        self.metrics_aspect = MetricsAspect()
+        self.metrics_aspect.apply_to_public_methods(
             self.service,
             include=["get_cart", "add_to_cart", "checkout"],
         )
@@ -44,7 +51,8 @@ class CartApp:
 
         @self.app.route("/metrics", methods=["GET"])
         def metrics():
-            return "# metrics\n", 200
+            body, content_type = self.service.export_metrics()
+            return body, 200, {"Content-Type": content_type}
 
         @self.app.route("/health", methods=["GET"])
         def health_check():

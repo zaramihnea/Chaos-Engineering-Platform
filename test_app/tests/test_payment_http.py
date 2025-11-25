@@ -1,6 +1,6 @@
 import pytest
 
-from common import env  # noqa: F401
+from common import env
 from common.db import db_available
 from microservices.payment.app import PaymentApp
 from microservices.cart.cart_service import CartService
@@ -18,7 +18,6 @@ def _client():
 def test_http_payment_process_marks_paid():
     user = "pam"
     cart = CartService("cart", 5002)
-    # prepare an order to pay
     cart.add_to_cart(user, 1)
     checkout = cart.checkout(user)
 

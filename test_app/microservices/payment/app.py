@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from microservices.payment.payment_service import PaymentService
 from aop.logging_aspect import LoggingAspect
 from aop.health_info_aspect import HealthInfoAspect
+from aop.metrics_aspect import MetricsAspect
 
 class PaymentApp:
     def __init__(self):
@@ -9,6 +10,11 @@ class PaymentApp:
         self.service = PaymentService("payment", 5003)
         self.aspect = LoggingAspect()
         self.aspect.apply_to_public_methods(
+            self.service,
+            include=["process_payment", "refund_payment"],
+        )
+        self.metrics_aspect = MetricsAspect()
+        self.metrics_aspect.apply_to_public_methods(
             self.service,
             include=["process_payment", "refund_payment"],
         )
@@ -40,7 +46,8 @@ class PaymentApp:
 
         @self.app.route("/metrics", methods=["GET"])
         def metrics():
-            return "# metrics\n", 200
+            body, content_type = self.service.export_metrics()
+            return body, 200, {"Content-Type": content_type}
 
         @self.app.route("/health", methods=["GET"])
         def health_check():

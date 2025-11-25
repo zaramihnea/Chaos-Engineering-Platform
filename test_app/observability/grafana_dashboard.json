@@ -1,0 +1,57 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "Test App Metrics",
+    "tags": ["test_app"],
+    "timezone": "browser",
+    "schemaVersion": 30,
+    "version": 1,
+    "panels": [
+      {
+        "type": "timeseries",
+        "title": "Cart Checkout Rate (per second)",
+        "id": 1,
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(cart_checkout_total{service=\"cart\"}[5m])",
+            "legendFormat": "checkout rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "type": "timeseries",
+        "title": "Payment Failures (per second)",
+        "id": 2,
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(payment_payments_failed_total{service=\"payment\"}[5m])",
+            "legendFormat": "payment failures",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+      },
+      {
+        "type": "timeseries",
+        "title": "Cart Checkout Latency p95 (s)",
+        "id": 3,
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(cart_request_latency_seconds_bucket{service=\"cart\",method=\"checkout\"}[5m])) by (le))",
+            "legendFormat": "p95 checkout latency",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 8, "w": 24, "h": 8}
+      }
+    ],
+    "refresh": "10s"
+  },
+  "overwrite": false
+}
