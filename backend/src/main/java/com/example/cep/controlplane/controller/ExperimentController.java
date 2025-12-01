@@ -3,6 +3,7 @@ package com.example.cep.controlplane.controller;
 import com.example.cep.controlplane.api.ControlPlaneApi;
 import com.example.cep.model.ExperimentDefinition;
 import com.example.cep.model.Report;
+import com.example.cep.model.RunPlan;
 import com.example.cep.model.RunState;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -269,6 +270,7 @@ public class ExperimentController {
             @PathVariable String id,
             @RequestBody ApprovalRequest request) {
         try {
+
             String approver = request.approver() != null ? request.approver() : "system";
             String approvalId = controlPlaneApi.approveExperiment(id, approver);
             return ResponseEntity.ok(Map.of(
@@ -299,6 +301,34 @@ public class ExperimentController {
             "valid", isValid,
             "message", isValid ? "Experiment passes all policy checks" : "Experiment violates policy"
         ));
+    }
+    /**
+     * Get all scheduled runs for an experiment
+     *
+     * GET /api/experiments/{id}/runs
+     */
+    @Operation(
+            summary = "List all scheduled runs for an experiment",
+            description = "Returns all RunPlan objects associated with the given experiment."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Runs retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Experiment not found")
+    })
+    @GetMapping("/experiments/{id}/runs")
+    public ResponseEntity<?> listRunsForExperiment(
+            @Parameter(description = "Experiment ID", required = true)
+            @PathVariable String id) {
+
+        try {
+            List<RunPlan> runs = controlPlaneApi.getRunsForExperiment(id);
+
+            return ResponseEntity.ok(runs);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**

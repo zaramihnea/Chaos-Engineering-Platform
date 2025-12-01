@@ -64,6 +64,7 @@
 .exp-table td {
   border-bottom: 1px solid #ddd;
   padding: 10px;
+  text-align: center;
 }
 
 .paused-badge {
@@ -71,13 +72,6 @@
   padding: 5px 10px;
   border-radius: 5px;
   color: black;
-}
-
-.detail-btn {
-  background: none;
-  border: none;
-  color: #0077ff;
-  cursor: pointer;
 }
 
 .exp-right {
@@ -120,3 +114,164 @@
 .exp-events ul {
   padding-left: 18px;
 }
+
+
+.detail-card {
+  background: #1b1b1b;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.details-exp{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: start;
+
+}
+
+.small-table {
+  width: 100%;
+  font-size: 14px;
+  align-items: center;
+  justify-content: center;
+}
+
+.small-table tbody {
+  text-align: center;
+}
+
+.empty-text {
+  color: #bbb;
+  font-style: italic;
+}
+
+.label-item {
+  margin-left: 10px;
+  color: #ccc;
+}
+
+.summary-card .donut-chart {
+  margin: 10px auto;
+}
+
+.top-nav {
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #333;
+}
+
+.report-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.report-btn {
+  background: #252525;
+  border: 1px solid #333;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+  text-align: left;
+  color: #eee;
+}
+
+.report-btn:hover {
+  background: #333;
+  transform: translateX(3px);
+}
+
+.report-btn.pdf {
+  border-left: 4px solid #e74c3c;
+}
+
+.report-btn.csv {
+  border-left: 4px solid #27ae60;
+}
+
+.report-btn.json {
+  border-left: 4px solid #3498db;
+}
+
+.schedule-btn {
+  background: #2980b9;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  font-size: 15px;
+}
+
+.checkbox-row{
+  align-items: center;
+  justify-content: center;
+
+}
+
+.schedule-btn:hover {
+  background: #3498db;
+}
+
+.scheduler-panel {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scheduler-panel input[type="datetime-local"] {
+  padding: 10px;
+  background: #1b1b1b;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: white;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scheduler-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.confirm-btn {
+  background: #27ae60;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.confirm-btn:hover {
+  background: #2ecc71;
+}
+
+.cancel-btn {
+  background: #555;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #666;
+}
+
+
+

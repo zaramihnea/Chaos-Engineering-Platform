@@ -11,4 +11,5 @@ public interface ExperimentRepository {
     RunPlan findRunPlan(String runId);
     void saveReport(Report report);
     Report findReport(String runId);
+    List<RunPlan> findRunsByExperimentId(String experimentId);
 }
