@@ -5,7 +5,6 @@ from common import env as _env
 class PaymentService(BaseService):
     def __init__(self, name: str, port: int):
         super().__init__(name, port)
-        # business metrics
         self.payment_counter = self.metrics.create_counter(
             "payments_total", "Number of processed payments"
         )
