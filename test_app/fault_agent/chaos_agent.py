@@ -41,6 +41,12 @@ import re
 import http.client
 import socket
 
+import sys as _sys
+import pathlib as _pl
+_ws_root = _pl.Path(__file__).resolve().parents[1]
+if str(_ws_root) not in _sys.path:
+    _sys.path.insert(0, str(_ws_root))
+
 from fault_agent.docker_functions import (
     list_containers,
     pause_container,
@@ -50,6 +56,77 @@ from fault_agent.docker_functions import (
 )
 
 DOCKER_CMD = os.environ.get("DOCKER_CMD", "docker")
+
+
+MONITORING_EXCLUDES = {
+    "testapp_prometheus",
+    "testapp_grafana",
+    "prometheus",
+    "grafana",
+    "jaeger",
+    "zipkin",
+    "loki",
+    "tempo",
+    "otel-collector",
+}
+MONITORING_PREFIXES = {"prometheus", "grafana", "otel", "loki", "tempo", "zipkin", "jaeger"}
+
+
+def is_monitoring_container(name: str) -> bool:
+    n = (name or "").lower()
+    if n in MONITORING_EXCLUDES:
+        return True
+    return any(n.startswith(p) for p in MONITORING_PREFIXES)
+
+
+def is_running_container(name: str) -> bool:
+    data = list_containers(all=False)
+    for c in data.get("containers", []):
+        if c.get("Names") == name:
+            return True
+    return False
+
+
+def container_exists(name: str) -> bool:
+    data = list_containers(all=True)
+    for c in data.get("containers", []):
+        if c.get("Names") == name:
+            return True
+    return False
+
+
+class Monitor:
+    def __init__(self, log_path: pathlib.Path) -> None:
+        self.log_path = log_path
+
+    def check_target(self, name: str) -> tuple[bool, str | None]:
+        if is_monitoring_container(name):
+            return False, "target excluded (monitoring container)"
+        if not container_exists(name):
+            return False, "target not found"
+        if not is_running_container(name):
+            return False, "target not running"
+        return True, None
+
+    def log_violation(self, action: str, target: str, reason: str) -> None:
+        write_log_line(self.log_path, {
+            "ts": time.time(),
+            "action": action,
+            "target": target,
+            "violation": reason,
+        })
+
+
+def require_valid_target(monitor: Monitor):
+    def _decorator(fn: Callable[[str], Dict[str, Any]]):
+        def _wrapped(name: str) -> Dict[str, Any]:
+            ok, reason = monitor.check_target(name)
+            if not ok:
+                monitor.log_violation(getattr(fn, "__name__", "action"), name, reason or "invalid target")
+                return {"error": reason or "invalid target"}
+            return fn(name)
+        return _wrapped
+    return _decorator
 
 
 def _run(cmd: List[str], timeout: int = 30) -> Dict[str, Any]:
@@ -170,8 +247,8 @@ def pick_targets(configured: List[str]) -> List[str]:
         base = [n for n in configured if n in names]
     else:
         base = list(names)
-    excluded = {"testapp_prometheus", "testapp_grafana"}
-    return [n for n in base if n not in excluded]
+    # Filter out monitoring/observability infra containers
+    return [n for n in base if not is_monitoring_container(n)]
 
 
 def log_event(event: Dict[str, Any], json_mode: bool) -> None:
@@ -369,11 +446,6 @@ def prom_instance_label(name: str) -> str | None:
 
 
 def discover_instance_for_target(prom_url: str, job: str, target: str) -> str | None:
-    """Discover the actual instance label for a target by matching its port.
-
-    Some environments label instances like host.docker.internal:5002 instead of cart:5002.
-    We query up{job="..."} and select the instance that ends with the expected port.
-    """
     port_map = {
         "testapp_gateway": 5000,
         "testapp_catalog": 5001,
@@ -407,12 +479,6 @@ def prom_query(prom_url: str, promql: str, timeout: int = 4) -> Dict[str, Any]:
 
 
 def get_prom_queries_for_target(target: str, instance: str) -> Dict[str, str]:
-    """Return alias->PromQL for interesting per-service metrics filtered by instance.
-
-    - Always include CPU and RSS from process collectors.
-    - cart: checkout throughput and amount p90
-    - payment: payments throughput, failed throughput, amount p90
-    """
     q: Dict[str, str] = {}
     q["cpu_seconds_per_s"] = f"sum(rate(process_cpu_seconds_total{{instance=\"{instance}\"}}[1m]))"
     q["rss_bytes"] = f"avg(process_resident_memory_bytes{{instance=\"{instance}\"}})"
@@ -483,7 +549,7 @@ def metrics_block(name: str) -> Dict[str, Any]:
     return {"iptables_add": add, "fallback_patch": fallback, "iptables_remove": remove}
 
 
-def build_focused_executor(fault: str, hog_mem_mb: int | None = None) -> Callable[[str], Dict[str, Any]]:
+def build_focused_executor(fault: str, hog_mem_mb: int | None = None, monitor: Monitor | None = None) -> Callable[[str], Dict[str, Any]]:
     mapping: Dict[str, Callable[[str], Dict[str, Any]]] = {
         "cpu_hog": lambda n: burn_cpu_in_container(n, seconds=random.choice([15, 25, 35])),
         "memory_hog": lambda n: burn_mem_in_container(
@@ -499,11 +565,14 @@ def build_focused_executor(fault: str, hog_mem_mb: int | None = None) -> Callabl
         "disk_fill": disk_fill,
         "metrics_block": metrics_block,
     }
-    return mapping[fault]
+    exec_fn = mapping[fault]
+    if monitor is not None:
+        exec_fn = require_valid_target(monitor)(exec_fn)
+    return exec_fn
 
 
-def build_mixed_actions(hog_mem_mb: int | None = None) -> Dict[str, Callable[[str], Dict[str, Any]]]:
-    return {
+def build_mixed_actions(hog_mem_mb: int | None = None, monitor: Monitor | None = None) -> Dict[str, Callable[[str], Dict[str, Any]]]:
+    actions: Dict[str, Callable[[str], Dict[str, Any]]] = {
         "pause": pause_unpause,
         "restart": restart_container,
         "kill_restart": kill_restart,
@@ -518,6 +587,9 @@ def build_mixed_actions(hog_mem_mb: int | None = None) -> Dict[str, Callable[[st
         "disk_fill": disk_fill,
         "metrics_block": metrics_block,
     }
+    if monitor is not None:
+        actions = {k: require_valid_target(monitor)(v) for k, v in actions.items()}
+    return actions
 
 
 def parse_args() -> argparse.Namespace:
@@ -566,12 +638,29 @@ def main() -> None:
     hog_mem_mb = int(args.hog_mem_mb)
     refresh_every = 10
 
-    executor = build_focused_executor(fault, hog_mem_mb=hog_mem_mb) if mode == "focused" else None
-    actions = build_mixed_actions(hog_mem_mb=hog_mem_mb) if mode == "mixed" else None
+    monitor = Monitor(log_path=pathlib.Path(args.log_file))
+    executor = build_focused_executor(fault, hog_mem_mb=hog_mem_mb, monitor=monitor) if mode == "focused" else None
+    actions = build_mixed_actions(hog_mem_mb=hog_mem_mb, monitor=monitor) if mode == "mixed" else None
     end_time = time.time() + duration
     iteration = 0
     targets = pick_targets(configured_targets)
     if not targets:
+        if configured_targets:
+            for t in configured_targets:
+                ok, reason = monitor.check_target(t)
+                if not ok:
+                    monitor.log_violation(action=fault if mode == "focused" else "mixed", target=t, reason=reason or "ineligible target")
+        all_running = list_containers(all=False).get("containers", [])
+        eligible_running = [c.get("Names") for c in all_running if c.get("Names") and not is_monitoring_container(c.get("Names"))]
+        summary_reason = "no eligible endpoints available" if not eligible_running else "configured endpoints not eligible"
+        write_log_line(log_path, {
+            "ts": time.time(),
+            "action": fault if mode == "focused" else "mixed",
+            "summary": {
+                "eligible_running": eligible_running,
+                "message": summary_reason,
+            }
+        })
         print("No eligible target containers found (after exclusions).")
         return
     stats = Stats()
