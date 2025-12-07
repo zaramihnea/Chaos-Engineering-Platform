@@ -13,4 +13,5 @@ public interface ControlPlaneApi {
     void deleteExperiment(String experimentId);
     String approveExperiment(String experimentId, String approver);
     boolean validatePolicy(ExperimentDefinition def);
+    List<RunPlan> getRunsForExperiment(String experimentId);
 }

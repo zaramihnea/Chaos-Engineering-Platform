@@ -59,4 +59,11 @@ public class InMemoryExperimentRepository implements ExperimentRepository {
     public Report findReport(String runId) {
         return reports.get(runId);
     }
+
+    @Override
+    public List<RunPlan> findRunsByExperimentId(String experimentId) {
+        return runPlans.values().stream()
+                .filter(r -> r.getDefinition().getId().equals(experimentId))
+                .toList();
+    }
 }

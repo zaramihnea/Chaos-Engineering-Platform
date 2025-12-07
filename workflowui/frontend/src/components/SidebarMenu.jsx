@@ -27,15 +27,6 @@ export default function SidebarMenu() {
         >
           🧪 Experiments
         </NavLink>
-
-        <NavLink
-          to="/workflows"
-          className={({ isActive }) =>
-            isActive ? "sidebar-item active" : "sidebar-item"
-          }
-        >
-          🔁 Workflows
-        </NavLink>
       </div>
 
       <div className="sidebar-bottom">

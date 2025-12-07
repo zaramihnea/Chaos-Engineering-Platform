@@ -283,6 +283,11 @@ public class ControlPlaneApiImpl implements ControlPlaneApi {
     public boolean validatePolicy(ExperimentDefinition def) {
         return policyService.isAllowed(def);
     }
+
+    @Override
+    public List<RunPlan> getRunsForExperiment(String experimentId) {
+        return experimentRepository.findRunsByExperimentId(experimentId);
+    }
 }
 
 /**

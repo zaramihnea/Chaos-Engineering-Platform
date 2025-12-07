@@ -104,12 +104,8 @@ export default function WorkflowList() {
                   <td>
                     <button
                       onClick={() => {
-                        // mark navigation as intentional
                         sessionStorage.setItem("workflow-nav-token", "true");
-
-                        // store the workflow ID (optional)
                         sessionStorage.setItem("workflowId", w.id);
-
                         navigate(`/workflow/${w.id}`);
                       }}
                     >

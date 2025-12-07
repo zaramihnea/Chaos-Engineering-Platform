@@ -11,7 +11,7 @@ export default function useNavigationMonitor() {
       console.warn(
         "MOP VIOLATION: Manual navigation to workflow page detected. Redirecting..."
       );
-      navigate("/workflows");
+      navigate("/");
       return;
     }
 

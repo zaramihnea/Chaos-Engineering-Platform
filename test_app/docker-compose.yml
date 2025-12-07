@@ -22,3 +22,55 @@ services:
       - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+
+  gateway:
+    build:
+      context: .
+      dockerfile: ./microservices/gateway/Dockerfile
+    container_name: testapp_gateway
+    environment:
+      - DATABASE_URL=postgresql://postgres:letmein@host.docker.internal:5432/test_app
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    depends_on:
+      - catalog
+      - cart
+      - payment
+
+  catalog:
+    build:
+      context: .
+      dockerfile: ./microservices/catalog/Dockerfile
+    container_name: testapp_catalog
+    environment:
+      - DATABASE_URL=postgresql://postgres:letmein@host.docker.internal:5432/test_app
+    ports:
+      - "5001:5001"
+    restart: unless-stopped
+
+  cart:
+    build:
+      context: .
+      dockerfile: ./microservices/cart/Dockerfile
+    container_name: testapp_cart
+    environment:
+      - DATABASE_URL=postgresql://postgres:letmein@host.docker.internal:5432/test_app
+    ports:
+      - "5002:5002"
+    restart: unless-stopped
+    depends_on:
+      - catalog
+
+  payment:
+    build:
+      context: .
+      dockerfile: ./microservices/payment/Dockerfile
+    container_name: testapp_payment
+    environment:
+      - DATABASE_URL=postgresql://postgres:letmein@host.docker.internal:5432/test_app
+    ports:
+      - "5003:5003"
+    restart: unless-stopped
+    depends_on:
+      - cart

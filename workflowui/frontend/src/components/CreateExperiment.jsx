@@ -5,54 +5,60 @@ import "../styles/CreateExperiment.css";
 export default function CreateExperiment() {
   const [experimentalName, setExperimentName] = useState("");
   const [faultType, setFaultType] = useState(null);
-  const [parameters, setParameters] = useState([]);
-  const [targetPod, setTargetPod] = useState(null);
-  const [timeout, setTimeout] = useState("");
-  const [slos, setSlos] = useState([]);
-  const [newSlo, setNewSlo] = useState("");
   const [dryRunAllowed, setDryRunAllowed] = useState(false);
 
-  useFormMonitor(
-  {
-    experimentalName,
-    faultType,
-    targetPod
-  },
-  {
-    experimentalName: {
-      check: (v) => v.length > 0,
-      message: "Experiment must have a name"
-    },
-    faultType: {
-      check: (v) => v !== null,
-      message: "Fault type must be selected"
-    },
-    targetPod: {
-      check: (v) => v !== null,
-      message: "At least one target pod must be selected"
-    }
-  }
-);
+  const [cluster, setCluster] = useState("");
+  const [namespace, setNamespace] = useState("");
+  const [labels, setLabels] = useState({});
+  const [labelKey, setLabelKey] = useState("");
+  const [labelValue, setLabelValue] = useState("");
 
-
-  const targets = [
-    { id: "POD_FAULT", label: "POD FAULT" },
-    { id: "NETWORK_ATTACK", label: "NETWORK ATTACK" },
-    { id: "IO_INJECTION", label: "IO INJECTION" },
-    { id: "STRESS_TEST", label: "STRESS TEST" },
-  ];
-
-  const podData = [
-    {
-      name: "ws-ek8djp9sid9seu-5d9458f6d6-lclsb",
-      namespace: "ns-90f142599393456ba881cad8580af4e",
-      ip: "10.60.125.171",
-      status: "Running",
-    },
-  ];
+  const [timeoutSeconds, setTimeoutSeconds] = useState("");
 
   const [paramKey, setParamKey] = useState("");
   const [paramValue, setParamValue] = useState("");
+  const [parameters, setParameters] = useState([]);
+
+  const [sloMetric, setSloMetric] = useState("LATENCY_P95");
+  const [sloComparator, setSloComparator] = useState("<");
+  const [sloThreshold, setSloThreshold] = useState("");
+  const [sloPromQuery, setSloPromQuery] = useState("");
+  const [slos, setSlos] = useState([]);
+
+  useFormMonitor(
+    {
+      experimentalName,
+      faultType,
+      cluster,
+      namespace,
+    },
+    {
+      experimentalName: {
+        check: (v) => v.length > 0,
+        message: "Experiment must have a name",
+      },
+      faultType: {
+        check: (v) => v !== null,
+        message: "Fault type must be selected",
+      },
+      cluster: {
+        check: (v) => v.length > 0,
+        message: "Cluster field cannot be empty",
+      },
+      namespace: {
+        check: (v) => v.length > 0,
+        message: "Namespace cannot be empty",
+      },
+    }
+  );
+
+  const targets = [
+    "POD_KILL",
+    "CPU_STRESS",
+    "MEMORY_STRESS",
+    "NETWORK_DELAY",
+    "NETWORK_PARTITION",
+  ];
 
   const addParameter = () => {
     if (!paramKey || !paramValue) return;
@@ -61,38 +67,65 @@ export default function CreateExperiment() {
     setParamValue("");
   };
 
+  const addLabel = () => {
+    if (!labelKey || !labelValue) return;
+    setLabels({ ...labels, [labelKey]: labelValue });
+    setLabelKey("");
+    setLabelValue("");
+  };
+
   const addSlo = () => {
-    if (!newSlo.trim()) return;
+    if (!sloThreshold || !sloPromQuery) return;
+
+    const newSlo = {
+      metric: sloMetric,
+      comparator: sloComparator,
+      threshold: Number(sloThreshold),
+      promQuery: sloPromQuery,
+    };
+
     setSlos([...slos, newSlo]);
-    setNewSlo("");
+
+    setSloThreshold("");
+    setSloPromQuery("");
   };
 
-  const submitExperiment = () => {
-    const experiment = {
+  const buildApiPayload = () => {
+    return {
+      id: crypto.randomUUID(),
       name: experimentalName,
       faultType: faultType,
-      parameters: Object.fromEntries(parameters.map((p) => [p.key, p.value])),
-      target: targetPod,
-      timeout,
-      slos,
+      parameters: Object.fromEntries(parameters.map((p) => [p.key, {}])),
+      target: {
+        cluster,
+        namespace,
+        labels,
+      },
+      timeout: `PT${timeoutSeconds}S`,
+      slos: slos,
       dryRunAllowed,
+      createdBy: "ui-user",
     };
-
-    console.log("Experiment sent:", experiment);
   };
 
-  const saveExperiment = () => {
-    const experiment = {
-      name: experimentalName,
-      faultType: faultType,
-      parameters: Object.fromEntries(parameters.map((p) => [p.key, p.value])),
-      target: targetPod,
-      timeout,
-      slos,
-      dryRunAllowed,
-    };
+  const submitExperiment = async () => {
+    const payload = buildApiPayload();
 
-    console.log("Experiment saved:", experiment);
+    try {
+      const response = await fetch("/api/experiments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Failed to submit experiment");
+
+      alert("Experiment successfully submitted!");
+      console.log("API RESPONSE:", await response.json());
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting experiment.");
+    }
   };
 
   return (
@@ -109,50 +142,55 @@ export default function CreateExperiment() {
         <div className="target-grid">
           {targets.map((t) => (
             <div
-              key={t.id}
-              className={`target-card ${faultType === t.id ? "selected" : ""}`}
-              onClick={() => setFaultType(t.id)}
+              key={t}
+              className={`target-card ${faultType === t ? "selected" : ""}`}
+              onClick={() => setFaultType(t)}
             >
-              {t.label}
+              {t}
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <h2>Select Target Pod</h2>
+        <h2>Target Configuration</h2>
 
-        <table className="pods-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Name</th>
-              <th>Namespace</th>
-              <th>IP Address</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+        <label>Cluster</label>
+        <input
+          value={cluster}
+          onChange={(e) => setCluster(e.target.value)}
+          placeholder="Cluster name"
+        />
 
-          <tbody>
-            {podData.map((pod, idx) => (
-              <tr key={idx}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={targetPod?.name === pod.name}
-                    onChange={() => setTargetPod(pod)}
-                  />
-                </td>
-                <td>{pod.name}</td>
-                <td>{pod.namespace}</td>
-                <td>{pod.ip}</td>
-                <td>
-                  <span className="status-running">Running</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <label>Namespace</label>
+        <input
+          value={namespace}
+          onChange={(e) => setNamespace(e.target.value)}
+          placeholder="Namespace"
+        />
+
+        <h3>Labels</h3>
+        <div className="param-entry-row">
+          <input
+            placeholder="Key"
+            value={labelKey}
+            onChange={(e) => setLabelKey(e.target.value)}
+          />
+          <input
+            placeholder="Value"
+            value={labelValue}
+            onChange={(e) => setLabelValue(e.target.value)}
+          />
+          <button onClick={addLabel}>Add Label</button>
+        </div>
+
+        <ul>
+          {Object.entries(labels).map(([k, v]) => (
+            <li key={k}>
+              {k}: {v}
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section>
@@ -162,14 +200,13 @@ export default function CreateExperiment() {
         <input
           value={experimentalName}
           onChange={(e) => setExperimentName(e.target.value)}
-          placeholder="Enter experiment name"
         />
 
-        <label>Timeout (e.g. 10s, 2m, 1h)</label>
+        <label>Timeout (seconds)</label>
         <input
-          value={timeout}
-          onChange={(e) => setTimeout(e.target.value)}
-          placeholder="Duration"
+          type="number"
+          value={timeoutSeconds}
+          onChange={(e) => setTimeoutSeconds(e.target.value)}
         />
 
         <div className="row-switch">
@@ -196,57 +233,64 @@ export default function CreateExperiment() {
           <button onClick={addParameter}>Add</button>
         </div>
 
-        <div className="param-list">
+        <ul>
           {parameters.map((p, i) => (
-            <div key={i} className="param-card">
-              <span>
-                <strong>• {p.key}</strong>: {p.value}
-              </span>
-              <button
-                className="remove-param-btn"
-                onClick={() =>
-                  setParameters(parameters.filter((_, idx) => idx !== i))
-                }
-              >
-                ✖
-              </button>
-            </div>
+            <li key={i}>
+              {p.key}: {p.value}
+            </li>
           ))}
-        </div>
+        </ul>
 
         <h3>SLO Targets</h3>
-        <div className="slo-entry-row">
-          <input
-            placeholder="Define an SLO (e.g., Latency < 200ms)"
-            value={newSlo}
-            onChange={(e) => setNewSlo(e.target.value)}
-          />
-          <button onClick={addSlo}>Add</button>
-        </div>
 
-        <div className="slo-list">
+        <label>Metric</label>
+        <select
+          value={sloMetric}
+          onChange={(e) => setSloMetric(e.target.value)}
+        >
+          <option value="LATENCY_P95">Latency P95</option>
+          <option value="LATENCY_P99">Latency P99</option>
+          <option value="ERROR_RATE">Error Rate</option>
+          <option value="THROUGHPUT">Throughput</option>
+          <option value="AVAILABILITY">Availability</option>
+        </select>
+
+        <label>Comparator</label>
+        <select
+          value={sloComparator}
+          onChange={(e) => setSloComparator(e.target.value)}
+        >
+          <option value="<">Less Than</option>
+          <option value=">">Greater Than</option>
+        </select>
+
+        <label>Threshold</label>
+        <input
+          type="number"
+          value={sloThreshold}
+          onChange={(e) => setSloThreshold(e.target.value)}
+        />
+
+        <label>PromQL Query</label>
+        <input
+          value={sloPromQuery}
+          onChange={(e) => setSloPromQuery(e.target.value)}
+        />
+
+        <button onClick={addSlo}>Add SLO</button>
+
+        <ul>
           {slos.map((s, i) => (
-            <div key={i} className="slo-card">
-              <span> • {s}</span>
-              <button
-                className="remove-slo-btn"
-                onClick={() => setSlos(slos.filter((_, idx) => idx !== i))}
-              >
-                ✖
-              </button>
-            </div>
+            <li key={i}>
+              {s.metric} {s.comparator} {s.threshold} — {s.promQuery}
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      <div className="buttons-row">
-        <button className="submit-btn" onClick={submitExperiment}>
-          Submit Experiment
-        </button>
-        <button className="submit-btn" onClick={saveExperiment}>
-          Save Experiment
-        </button>
-      </div>
+      <button className="submit-btn" onClick={submitExperiment}>
+        Submit Experiment
+      </button>
     </div>
   );
 }

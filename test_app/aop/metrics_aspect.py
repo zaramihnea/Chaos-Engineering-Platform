@@ -4,15 +4,7 @@ from typing import Any, Callable, Iterable, Optional
 
 
 class MetricsAspect:
-    """Aspect that records call counts, errors and latency to a service's Prometheus exporter.
-
-    It expects the target object to have a `metrics` attribute implementing
-    `create_counter(name, description)` and `create_histogram(name, description)`.
-    """
-
     def __init__(self):
-        # cache of created metric objects per-service to avoid repeated creation
-        # key by service identity (id) to avoid collisions when multiple instances share the same name
         self._cache = {}
 
     def _ensure_metrics(self, service) -> tuple:
@@ -21,7 +13,6 @@ class MetricsAspect:
         if cached:
             return cached
 
-        # create per-service metrics (namespaced by PrometheusExporter)
         try:
             req_counter = service.metrics.create_counter(
                 "requests_total",
@@ -39,9 +30,7 @@ class MetricsAspect:
                 label_names=["service", "method"],
             )
         except Exception:
-            # If metrics creation fails for any reason, swallow errors and use None placeholders
             req_counter = err_counter = latency_hist = None
-
         self._cache[key] = (req_counter, err_counter, latency_hist)
         return self._cache[key]
 
@@ -55,7 +44,6 @@ class MetricsAspect:
             try:
                 result = func(*args, **kwargs)
             except Exception:
-                # increment failure metric
                 if err_counter is not None:
                     try:
                         err_counter.labels(service=service.name, method=method_name).inc()
@@ -64,7 +52,6 @@ class MetricsAspect:
                 raise
             finally:
                 elapsed = time.time() - start
-                # increment request count and observe latency
                 if req_counter is not None:
                     try:
                         req_counter.labels(service=service.name, method=method_name).inc()
