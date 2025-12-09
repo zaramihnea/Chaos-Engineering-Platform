@@ -247,7 +247,6 @@ def pick_targets(configured: List[str]) -> List[str]:
         base = [n for n in configured if n in names]
     else:
         base = list(names)
-    # Filter out monitoring/observability infra containers
     return [n for n in base if not is_monitoring_container(n)]
 
 
