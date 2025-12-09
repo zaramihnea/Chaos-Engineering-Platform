@@ -5,18 +5,21 @@ import json
 import fault_agent.chaos_agent as ca
 
 
+# Tests: chaos_agent.is_monitoring_container
 def test_is_monitoring_container_rules():
     assert ca.is_monitoring_container('prometheus')
     assert ca.is_monitoring_container('grafana-agent')
     assert not ca.is_monitoring_container('testapp_cart')
 
 
+# Tests: chaos_agent._parse_size_to_bytes
 def test_parse_size_to_bytes():
     assert ca._parse_size_to_bytes('1MiB') == 1024**2
     assert round(ca._parse_size_to_bytes('1.5GB')) == round(1.5 * 1000**3)
     assert ca._parse_size_to_bytes('bad') is None
 
 
+# Tests: chaos_agent.docker_stats_once (parse path)
 def test_docker_stats_once_parse(monkeypatch):
     def fake_run(cmd, timeout=30):
         return {'stdout': '12.5%|123MiB / 1GiB|33.3%|1kB / 2kB|3MB / 4MB', 'error': None}
@@ -27,12 +30,14 @@ def test_docker_stats_once_parse(monkeypatch):
     assert out['mem_limit_bytes'] == 1024**3
 
 
+# Tests: chaos_agent.docker_stats_once (error path)
 def test_docker_stats_once_error(monkeypatch):
     monkeypatch.setattr(ca, '_run', lambda *a, **k: {'stdout': '', 'error': 'bad'})
     out = ca.docker_stats_once('c')
     assert 'error' in out
 
 
+# Tests: chaos_agent.update_resources (cpu+mem flags)
 def test_update_resources_builds_flags(monkeypatch):
     captured = {}
     def fake_run(args, timeout=30):
@@ -45,6 +50,7 @@ def test_update_resources_builds_flags(monkeypatch):
     assert '--memory 256m' in cmd and cmd.endswith('cart')
 
 
+# Tests: chaos_agent.burn_cpu_in_container & burn_mem_in_container
 def test_burn_cpu_and_mem(monkeypatch):
     calls = []
     monkeypatch.setattr(ca, 'docker_exec', lambda name, exec_cmd, detach=True, timeout=30: calls.append(exec_cmd) or {'rc': 0})
@@ -53,6 +59,7 @@ def test_burn_cpu_and_mem(monkeypatch):
     assert any('python' in c for c in calls)
 
 
+# Tests: chaos_agent.pause_unpause
 def test_pause_unpause(monkeypatch):
     monkeypatch.setattr(ca, 'pause_container', lambda n: {'ok': True})
     monkeypatch.setattr(ca, 'unpause_container', lambda n: {'ok': True})
@@ -62,6 +69,7 @@ def test_pause_unpause(monkeypatch):
     assert 'pause' in res and 'unpause' in res
 
 
+# Tests: chaos_agent.kill_restart
 def test_kill_restart(monkeypatch):
     monkeypatch.setattr(ca, 'kill_container', lambda n: {'ok': True})
     monkeypatch.setattr(ca, 'time', types.SimpleNamespace(sleep=lambda s: None))
@@ -73,12 +81,14 @@ def test_kill_restart(monkeypatch):
     assert captured['cmd'].endswith('cart')
 
 
+# Tests: chaos_agent.pick_targets (exclusion logic)
 def test_pick_targets_excludes_monitoring(monkeypatch):
     monkeypatch.setattr(ca, 'list_containers', lambda all=False: {'containers': [{'Names': 'testapp_cart'}, {'Names': 'prometheus'}]})
     monkeypatch.setattr(ca, 'is_monitoring_container', lambda n: n == 'prometheus')
     assert ca.pick_targets([]) == ['testapp_cart']
 
 
+# Tests: chaos_agent.Monitor.check_target
 def test_monitor_check_target(monkeypatch, tmp_path):
     m = ca.Monitor(log_path=tmp_path / 'chaos.log')
     monkeypatch.setattr(ca, 'is_monitoring_container', lambda n: n == 'grafana')
@@ -95,6 +105,7 @@ def test_monitor_check_target(monkeypatch, tmp_path):
     assert ok is True and reason is None
 
 
+# Tests: chaos_agent.require_valid_target (invalid target logs)
 def test_require_valid_target_logs(monkeypatch, tmp_path):
     m = ca.Monitor(log_path=tmp_path / 'chaos.log')
     log_calls = []
@@ -109,6 +120,7 @@ def test_require_valid_target_logs(monkeypatch, tmp_path):
     assert log_calls and log_calls[0]['violation'] == 'bad'
 
 
+# Tests: chaos_agent.prom_query (success) & eval_prom_queries
 def test_prom_query_and_eval(monkeypatch):
     class FakeResponse:
         def __enter__(self):
@@ -136,6 +148,7 @@ def test_prom_query_and_eval(monkeypatch):
     assert vals['x'] == 1.23
 
 
+# Tests: chaos_agent.disk_fill & metrics_block (iptables fallback)
 def test_disk_fill_and_metrics_block(monkeypatch):
     calls = []
     def fake_exec(name, cmd, detach=True, timeout=30):
@@ -152,6 +165,7 @@ def test_disk_fill_and_metrics_block(monkeypatch):
     assert isinstance(res2.get('fallback_patch'), dict)
 
 
+# Tests: chaos_agent.log_event (JSON and text)
 def test_log_event_json_and_text(monkeypatch, capsys):
     event = {"ts": 123.0, "action": "cpu_hog", "target": "cart", "result": {"ok": True}}
     ca.log_event(event, json_mode=True)
@@ -164,6 +178,7 @@ def test_log_event_json_and_text(monkeypatch, capsys):
     assert 'action=cpu_hog' in out2 and 'target=cart' in out2
 
 
+# Tests: chaos_agent.write_log_line (happy path)
 def test_write_log_line(tmp_path):
     p = tmp_path / 'log.jsonl'
     ev = {"ts": 1.0, "action": "test", "ok": True}
@@ -173,6 +188,7 @@ def test_write_log_line(tmp_path):
     assert data["action"] == "test" and data["ok"] is True
 
 
+# Tests: chaos_agent.discover_instance_for_target
 def test_discover_instance_for_target(monkeypatch):
     def fake_query(url, q):
         return {
@@ -189,11 +205,13 @@ def test_discover_instance_for_target(monkeypatch):
     assert inst == 'cart:5002'
 
 
+# Tests: chaos_agent.prom_instance_label
 def test_prom_instance_label_mapping():
     assert ca.prom_instance_label('testapp_cart').endswith(':5002')
     assert ca.prom_instance_label('testapp_payment').endswith(':5003')
 
 
+# Tests: chaos_agent.log_event (text ok/error)
 def test_log_event_text_modes(capsys):
     event_ok = {"ts": 123.0, "action": "restart", "target": "catalog", "result": {"ok": True}}
     ca.log_event(event_ok, json_mode=False)
@@ -206,6 +224,7 @@ def test_log_event_text_modes(capsys):
     assert 'status=boom' in out_err
 
 
+# Tests: chaos_agent.update_resources (cpu-only)
 def test_update_resources_cpu_only(monkeypatch):
     captured = {}
     monkeypatch.setattr(ca, '_run', lambda args, timeout=30: captured.setdefault('cmd', ' '.join(args)) or {'rc': 0})
@@ -213,6 +232,7 @@ def test_update_resources_cpu_only(monkeypatch):
     assert '--cpu-quota' in captured['cmd'] and '--memory' not in captured['cmd']
 
 
+# Tests: chaos_agent.update_resources (mem-only)
 def test_update_resources_mem_only(monkeypatch):
     captured = {}
     monkeypatch.setattr(ca, '_run', lambda args, timeout=30: captured.setdefault('cmd', ' '.join(args)) or {'rc': 0})
@@ -220,6 +240,7 @@ def test_update_resources_mem_only(monkeypatch):
     assert '--memory 128m' in captured['cmd'] and '--cpu-quota' not in captured['cmd']
 
 
+# Tests: chaos_agent.is_running_container & container_exists
 def test_container_exists_and_is_running(monkeypatch):
     monkeypatch.setattr(ca, 'list_containers', lambda all=False: {
         'containers': [{'Names': 'testapp_cart'}]
@@ -235,6 +256,7 @@ def test_container_exists_and_is_running(monkeypatch):
     assert ca.container_exists('missing') is False
 
 
+# Tests: chaos_agent.metrics_block (fallback + remove)
 def test_metrics_block_fallback(monkeypatch):
     calls = {}
     def fake_exec(name, cmd, detach=True, timeout=30):
@@ -250,6 +272,7 @@ def test_metrics_block_fallback(monkeypatch):
     assert 'iptables -D' in calls['cmds'][-1]
 
 
+# Tests: chaos_agent.probe_target (unknown/success)
 def test_probe_target_unknown_and_success(monkeypatch):
     assert ca.probe_target('unknown') is None
 
@@ -262,6 +285,7 @@ def test_probe_target_unknown_and_success(monkeypatch):
     assert isinstance(ca.probe_target('testapp_cart'), float)
 
 
+# Tests: chaos_agent.build_focused_executor (all fault mappings)
 def test_build_focused_executor_all_faults(monkeypatch):
     monkeypatch.setattr(ca, 'docker_exec', lambda *a, **k: {'rc': 0})
     monkeypatch.setattr(ca, 'pause_container', lambda n: {'ok': True})
@@ -280,6 +304,7 @@ def test_build_focused_executor_all_faults(monkeypatch):
         assert isinstance(out, dict)
 
 
+# Tests: chaos_agent.prom_query (error path)
 def test_prom_query_error_path(monkeypatch):
     def raiser(*a, **k):
         raise RuntimeError('boom')
@@ -288,6 +313,7 @@ def test_prom_query_error_path(monkeypatch):
     assert 'error' in data
 
 
+# Tests: chaos_agent.Stats.add_uptime & summary (invalid values)
 def test_stats_add_uptime_invalid_values():
     s = ca.Stats()
     s.add_uptime('not-a-number', None)
@@ -297,6 +323,7 @@ def test_stats_add_uptime_invalid_values():
     assert summary['uptime']['missing_after'] >= 1
 
 
+# Tests: chaos_agent.pick_targets (configured filter)
 def test_pick_targets_with_configured_filter(monkeypatch):
     monkeypatch.setattr(ca, 'list_containers', lambda all=False: {
         'containers': [
@@ -310,6 +337,7 @@ def test_pick_targets_with_configured_filter(monkeypatch):
     assert filtered == ['testapp_cart']
 
 
+# Tests: chaos_agent.require_valid_target (valid target executes)
 def test_require_valid_target_success(monkeypatch, tmp_path):
     m = ca.Monitor(log_path=tmp_path / 'chaos.log')
     monkeypatch.setattr(ca.Monitor, 'check_target', lambda self, n: (True, None))
@@ -320,6 +348,7 @@ def test_require_valid_target_success(monkeypatch, tmp_path):
     assert ran.get('ok') is True and out['ok'] is True
 
 
+# Tests: chaos_agent.build_focused_executor/build_mixed_actions with monitor wrapping
 def test_build_focused_and_mixed_wrapping(monkeypatch, tmp_path):
     m = ca.Monitor(log_path=tmp_path / 'chaos.log')
     monkeypatch.setattr(ca.Monitor, 'check_target', lambda self, n: (False, 'invalid'))
@@ -334,6 +363,7 @@ def test_build_focused_and_mixed_wrapping(monkeypatch, tmp_path):
         assert isinstance(out, dict)
 
 
+# Tests: chaos_agent.Stats.add/add_probe/add_docker_stats & summary
 def test_stats_aggregation():
     s = ca.Stats()
     s.add('a', 't', ok=True)
@@ -350,6 +380,7 @@ def test_stats_aggregation():
     assert summary['docker']['cpu_pct']['avg_before'] == 10.0
 
 
+# Tests: chaos_agent.Stats.add_prom & summary delta
 def test_stats_prom_delta():
     s = ca.Stats()
     s.add_prom({'m': 10.0}, {'m': 15.0})
@@ -359,6 +390,7 @@ def test_stats_prom_delta():
     assert summ['prom']['m']['delta_pct'] == 50.0
 
 
+# Tests: chaos_agent.main (focused mode, duration=0)
 def test_main_smoke(monkeypatch, tmp_path):
     monkeypatch.setattr(ca, 'parse_args', lambda: types.SimpleNamespace(
         mode='focused', fault='cpu_hog', targets='testapp_cart', duration=0, interval=0,
@@ -379,6 +411,7 @@ def test_main_smoke(monkeypatch, tmp_path):
     assert (tmp_path / 'chaos.log').exists()
 
 
+# Tests: chaos_agent.main (mixed mode early-exit + summary)
 def test_main_mixed_no_targets_summary(monkeypatch, tmp_path):
     monkeypatch.setattr(ca, 'parse_args', lambda: types.SimpleNamespace(
         mode='mixed', fault='cpu_hog', targets='testapp_cart', duration=0, interval=0,
@@ -392,6 +425,7 @@ def test_main_mixed_no_targets_summary(monkeypatch, tmp_path):
     assert 'summary' in content
 
 
+# Tests: chaos_agent.get_prom_queries_for_target (cart/payment)
 def test_get_prom_queries_for_target():
     cart_q = ca.get_prom_queries_for_target('testapp_cart', 'cart:5002')
     assert 'throughput_rps' in cart_q and 'amount_p90' in cart_q
@@ -399,6 +433,7 @@ def test_get_prom_queries_for_target():
     assert 'fail_rps' in pay_q and 'amount_p90' in pay_q
 
 
+# Tests: chaos_agent.probe_target (exception path)
 def test_probe_target_error_path(monkeypatch):
     def raiser(*a, **k):
         raise TimeoutError('timeout')
@@ -406,6 +441,7 @@ def test_probe_target_error_path(monkeypatch):
     assert ca.probe_target('testapp_cart') is None
 
 
+# Tests: chaos_agent.write_log_line (exception path)
 def test_write_log_line_error(monkeypatch, tmp_path):
     # Patch Path.open to raise to exercise exception path
     p = tmp_path / 'bad.log'
