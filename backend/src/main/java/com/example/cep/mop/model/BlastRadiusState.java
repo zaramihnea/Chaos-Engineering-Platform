@@ -83,6 +83,10 @@ public class BlastRadiusState {
         return affectedServices.size();
     }
 
+    public boolean hasAffectedResources() {
+        return !affectedPods.isEmpty() || !affectedNamespaces.isEmpty() || !affectedServices.isEmpty();
+    }
+
     // ═══════════════════════════════════════════════════════════════════════════════
     // Threshold Checking
     // ═══════════════════════════════════════════════════════════════════════════════
@@ -190,19 +194,21 @@ public class BlastRadiusState {
         sb.append(String.format("║ Affected Services:   %-39d ║\n", getAffectedServiceCount()));
         sb.append("╚════════════════════════════════════════════════════════════════╝\n");
 
-        if (!affectedPods.isEmpty()) {
-            sb.append("\nAffected Pods:\n");
-            affectedPods.forEach(pod -> sb.append("  - ").append(pod).append("\n"));
-        }
+        if (hasAffectedResources()) {
+            if (!affectedPods.isEmpty()) {
+                sb.append("\nAffected Pods:\n");
+                affectedPods.forEach(pod -> sb.append("  - ").append(pod).append("\n"));
+            }
 
-        if (!affectedNamespaces.isEmpty()) {
-            sb.append("\nAffected Namespaces:\n");
-            affectedNamespaces.forEach(ns -> sb.append("  - ").append(ns).append("\n"));
-        }
+            if (!affectedNamespaces.isEmpty()) {
+                sb.append("\nAffected Namespaces:\n");
+                affectedNamespaces.forEach(ns -> sb.append("  - ").append(ns).append("\n"));
+            }
 
-        if (!affectedServices.isEmpty()) {
-            sb.append("\nAffected Services:\n");
-            affectedServices.forEach(svc -> sb.append("  - ").append(svc).append("\n"));
+            if (!affectedServices.isEmpty()) {
+                sb.append("\nAffected Services:\n");
+                affectedServices.forEach(svc -> sb.append("  - ").append(svc).append("\n"));
+            }
         }
 
         return sb.toString();
