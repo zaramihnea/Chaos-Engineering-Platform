@@ -195,6 +195,9 @@ public class ControlPlaneApiImpl implements ControlPlaneApi {
     /**
      * Retrieves the current state of a run
      *
+     * Queries the orchestrator for real-time run state from the active state store.
+     * If the run is not found in active state, checks if a report exists (completed run).
+     *
      * @param runId The ID of the run
      * @return Current execution state
      * @throws RunNotFoundException if run ID is invalid
@@ -208,8 +211,22 @@ public class ControlPlaneApiImpl implements ControlPlaneApi {
             );
         }
 
-        // In a full implementation, this would query the orchestrator for real-time state
-        // For now, return a basic state based on plan existence
+        // Query orchestrator for real-time state
+        RunState currentState = orchestratorService.getRunState(runId);
+
+        if (currentState != null) {
+            // Run is active - return real-time state
+            return currentState;
+        }
+
+        // Run not in active state - check if completed
+        Report report = experimentRepository.findReport(runId);
+        if (report != null) {
+            // Run has completed - return outcome from report
+            return report.getOutcome();
+        }
+
+        // Run exists in repository but hasn't been dispatched yet
         return RunState.SCHEDULED;
     }
 

@@ -1,0 +1,205 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (hosts both chaos_engineering and test_app databases)
+  postgres:
+    image: postgres:15-alpine
+    container_name: cep-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: chaos_engineering,test_app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
+    ports:
+      - "5432:5432"
+    networks:
+      - cep-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cep-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./test_app/observability/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - cep-network
+    depends_on:
+      - gateway
+      - catalog
+      - cart
+      - payment
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cep-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./test_app/observability/grafana:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - cep-network
+    depends_on:
+      - prometheus
+
+  # Backend - Spring Boot Control Plane
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cep-backend
+    environment:
+      - DATABASE_URL=jdbc:postgresql://postgres:5432/chaos_engineering
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=postgres
+      - PROMETHEUS_URL=http://prometheus:9090
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./backend/fault_agent.py:/app/backend/fault_agent.py
+      - ./backend/chaos_agent.py:/app/backend/chaos_agent.py
+      - ./backend/docker_functions.py:/app/backend/docker_functions.py
+    networks:
+      - cep-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Frontend - React UI served by Nginx
+  frontend:
+    build:
+      context: ./workflowui/frontend
+      dockerfile: Dockerfile
+    container_name: cep-frontend
+    ports:
+      - "80:80"
+    networks:
+      - cep-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Test App - Gateway Microservice
+  gateway:
+    build:
+      context: ./test_app
+      dockerfile: ./microservices/gateway/Dockerfile
+    container_name: cep-gateway
+    environment:
+      - CATALOG_SERVICE_URL=http://catalog:5001
+      - CART_SERVICE_URL=http://cart:5002
+      - PAYMENT_SERVICE_URL=http://payment:5003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=test_app
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "5010:5000"
+    networks:
+      - cep-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Test App - Catalog Microservice
+  catalog:
+    build:
+      context: ./test_app
+      dockerfile: ./microservices/catalog/Dockerfile
+    container_name: cep-catalog
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=test_app
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "5011:5001"
+    networks:
+      - cep-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Test App - Cart Microservice
+  cart:
+    build:
+      context: ./test_app
+      dockerfile: ./microservices/cart/Dockerfile
+    container_name: cep-cart
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=test_app
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "5012:5002"
+    networks:
+      - cep-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Test App - Payment Microservice
+  payment:
+    build:
+      context: ./test_app
+      dockerfile: ./microservices/payment/Dockerfile
+    container_name: cep-payment
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=test_app
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+    ports:
+      - "5013:5003"
+    networks:
+      - cep-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+networks:
+  cep-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:

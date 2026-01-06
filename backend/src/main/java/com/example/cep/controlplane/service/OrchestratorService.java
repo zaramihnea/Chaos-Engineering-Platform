@@ -5,4 +5,5 @@ public interface OrchestratorService {
     String dispatch(RunPlan plan);
     void handleAgentUpdate(String runId, String status, java.util.Map<String,Object> payload);
     Report finalizeRun(String runId, RunState outcome);
+    RunState getRunState(String runId);
 }

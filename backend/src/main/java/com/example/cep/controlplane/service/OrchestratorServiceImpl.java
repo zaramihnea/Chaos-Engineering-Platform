@@ -118,10 +118,17 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         );
         runStateStore.put(runId, stateInfo);
 
-        // Step 3: Dispatch to agent (in production, this would call agent API/message queue)
-        // For now, we just log the dispatch
-        System.out.println("Run " + runId + " dispatched to agent for cluster: " +
-                         plan.getDefinition().getTarget().getCluster());
+        // Step 3: Dispatch to agent - Execute fault_agent.py with ProcessBuilder
+        try {
+            executeFaultAgent(plan);
+            System.out.println("Run " + runId + " dispatched to agent for cluster: " +
+                             plan.getDefinition().getTarget().getCluster());
+        } catch (Exception e) {
+            System.err.println("Failed to dispatch run " + runId + ": " + e.getMessage());
+            // Update state to FAILED if dispatch fails
+            runStateStore.get(runId).setState(RunState.FAILED);
+            throw new RuntimeException("Fault agent dispatch failed: " + e.getMessage(), e);
+        }
 
         // Step 4: Return run ID
         return runId;
@@ -255,6 +262,100 @@ public class OrchestratorServiceImpl implements OrchestratorService {
         runStateStore.remove(runId);
 
         return report;
+    }
+
+    /**
+     * Retrieves the current state of a running experiment
+     *
+     * Queries the in-memory state store for real-time run status.
+     * If run is not found in memory, it means either:
+     * 1. Run has completed and state was cleaned up
+     * 2. Run was never started
+     * 3. System was restarted (state is not persistent)
+     *
+     * @param runId The run ID to query
+     * @return Current RunState, or null if not found in active runs
+     */
+    @Override
+    public RunState getRunState(String runId) {
+        RunStateInfo stateInfo = runStateStore.get(runId);
+
+        if (stateInfo == null) {
+            // Run not found in active runs - could be completed or never started
+            return null;
+        }
+
+        return stateInfo.getState();
+    }
+
+    // ==================== Fault Agent Execution ====================
+
+    /**
+     * Executes the fault_agent.py script using ProcessBuilder
+     *
+     * Builds command arguments from RunPlan and executes the Python script
+     * that performs actual fault injection via Docker commands.
+     *
+     * @param plan The run plan containing experiment configuration
+     * @throws Exception if script execution fails
+     */
+    private void executeFaultAgent(RunPlan plan) throws Exception {
+        ExperimentDefinition def = plan.getDefinition();
+
+        // Build command arguments
+        String faultType = mapFaultType(def.getFaultType());
+        String target = def.getTarget().getCluster(); // or namespace, depending on your needs
+        String duration = String.valueOf(def.getTimeout().getSeconds());
+        String mode = plan.isDryRun() ? "dry-run" : "production";
+        String intensity = def.getParameters().getOrDefault("intensity", "50").toString();
+
+        // Build the command
+        ProcessBuilder processBuilder = new ProcessBuilder(
+            "python3",
+            "/app/backend/fault_agent.py",
+            "--fault-type", faultType,
+            "--target", target,
+            "--duration", duration,
+            "--mode", mode,
+            "--intensity", intensity
+        );
+
+        // Redirect output to logs
+        processBuilder.redirectErrorStream(true);
+
+        System.out.println("Executing fault agent: " + String.join(" ", processBuilder.command()));
+
+        // Start the process (non-blocking)
+        Process process = processBuilder.start();
+
+        // Optional: Read output in a separate thread for logging
+        new Thread(() -> {
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                    new java.io.InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("[FaultAgent] " + line);
+                }
+            } catch (Exception e) {
+                System.err.println("Error reading fault agent output: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    /**
+     * Maps FaultType enum to fault_agent.py fault type strings
+     *
+     * @param faultType The FaultType enum value
+     * @return String representation for fault_agent.py
+     */
+    private String mapFaultType(FaultType faultType) {
+        return switch (faultType) {
+            case CPU_STRESS -> "cpu";
+            case MEMORY_STRESS -> "memory";
+            case NETWORK_DELAY -> "network";
+            case NETWORK_PARTITION -> "network";
+            case POD_KILL -> "exception";
+        };
     }
 
     // ==================== Internal State Management ====================

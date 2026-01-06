@@ -10,3 +10,9 @@ scrape_configs:
          - 'catalog:5001'
          - 'cart:5002'
          - 'payment:5003'
+
+  - job_name: 'backend'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets:
+         - 'backend:8080'

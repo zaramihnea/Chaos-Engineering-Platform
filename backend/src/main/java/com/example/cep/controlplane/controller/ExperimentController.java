@@ -75,15 +75,29 @@ public class ExperimentController {
     @PostMapping("/experiments")
     public ResponseEntity<Map<String, String>> createExperiment(
             @Parameter(description = "Experiment definition with fault type, target, and SLOs")
-            @RequestBody ExperimentDefinition definition) {
+            @RequestBody ExperimentDefinition definition,
+            @Parameter(description = "Auto-run the experiment immediately after creation")
+            @RequestParam(required = false, defaultValue = "false") boolean autoRun,
+            @Parameter(description = "Run in dry-run mode (only if autoRun=true)")
+            @RequestParam(required = false, defaultValue = "false") boolean dryRun) {
         try {
             String experimentId = controlPlaneApi.createExperiment(definition);
+
+            Map<String, String> response = new java.util.HashMap<>();
+            response.put("experimentId", experimentId);
+            response.put("message", "Experiment created successfully");
+
+            // Auto-run if requested
+            if (autoRun) {
+                String runId = controlPlaneApi.scheduleRun(experimentId, Instant.now(), dryRun);
+                response.put("runId", runId);
+                response.put("status", "running");
+                response.put("message", "Experiment created and run started immediately");
+            }
+
             return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(Map.of(
-                    "experimentId", experimentId,
-                    "message", "Experiment created successfully"
-                ));
+                .body(response);
         } catch (Exception e) {
             return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)

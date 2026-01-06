@@ -1,0 +1,76 @@
+curl -X POST "http://localhost:8080/api/experiments?autoRun=true&dryRun=false" \
+    -H "Content-Type: application/json" \
+    -d '{
+      "name": "Instant Pod Kill",
+      "faultType": "POD_KILL",
+      "target": {"cluster": "dev-cluster", "namespace": "default", "labels": {}},
+      "timeout": "PT1M",
+      "slos": [{"metric": "LATENCY_P95", "query": "http_latency", "threshold": 1.0, "comparator": "<"}],
+      "parameters": {"intensity": "75"},
+      "dryRunAllowed": true,
+      "createdBy": "test"
+    }' | jq
+
+
+cep-backend     | [FaultAgent] ======================================================================
+cep-backend     | [FaultAgent] FAULT AGENT - Chaos Injection Wrapper
+cep-backend     | [FaultAgent] ======================================================================
+cep-backend     | [FaultAgent] Fault Type:   exception
+cep-backend     | [FaultAgent] Target:       dev-cluster
+cep-backend     | [FaultAgent] Duration:     60s
+cep-backend     | [FaultAgent] Mode:         production
+cep-backend     | [FaultAgent] Intensity:    75%
+cep-backend     | [FaultAgent] ======================================================================
+cep-backend     | [FaultAgent]
+cep-backend     | [FaultAgent] [CHAOS AGENT] Executing fault injection...
+cep-backend     | [FaultAgent] [CHAOS AGENT] Fault: kill_restart
+cep-backend     | [FaultAgent] [CHAOS AGENT] Targets: cep-catalog,cep-payment
+cep-backend     | [FaultAgent]
+cep-backend     | [FaultAgent] ======================================================================
+cep-backend     | [FaultAgent] CHAOS AGENT OUTPUT:
+cep-backend     | [FaultAgent] ======================================================================
+cep-backend     | [FaultAgent] Chaos agent: mode=focused fault=kill_restart targets=['cep-catalog', 'cep-payment'] duration=60s interval=30s
+cep-backend     | [FaultAgent] [CHAOS] action=kill_restart target=cep-catalog status=ok
+cep-backend     | [FaultAgent] [CHAOS] action=kill_restart target=cep-catalog status=ok
+cep-backend     | [FaultAgent] Chaos agent finished.
+cep-backend     | [FaultAgent] Summary:
+cep-backend     | [FaultAgent] {
+cep-backend     | [FaultAgent]   "total_actions": 2,
+cep-backend     | [FaultAgent]   "errors": 0,
+cep-backend     | [FaultAgent]   "error_pct": 0.0,
+cep-backend     | [FaultAgent]   "by_action": {
+cep-backend     | [FaultAgent]     "kill_restart": 2
+cep-backend     | [FaultAgent]   },
+cep-backend     | [FaultAgent]   "by_target": {
+cep-backend     | [FaultAgent]     "cep-catalog": 2
+cep-backend     | [FaultAgent]   },
+cep-backend     | [FaultAgent]   "probe": {
+cep-backend     | [FaultAgent]     "avg_latency_ms_before": null,
+cep-backend     | [FaultAgent]     "avg_latency_ms_after": null,
+cep-backend     | [FaultAgent]     "failed_probes_before": 0,
+cep-backend     | [FaultAgent]     "failed_probes_after": 0
+cep-backend     | [FaultAgent]   },
+cep-backend     | [FaultAgent]   "prom": {},
+cep-backend     | [FaultAgent]   "uptime": {
+cep-backend     | [FaultAgent]     "avg_before": null,
+cep-backend     | [FaultAgent]     "avg_after": null,
+cep-backend     | [FaultAgent]     "delta_pct": null,
+cep-backend     | [FaultAgent]     "missing_before": 2,
+cep-backend     | [FaultAgent]     "missing_after": 2
+cep-backend     | [FaultAgent]   },
+cep-backend     | [FaultAgent]   "docker": {
+cep-backend     | [FaultAgent]     "cpu_pct": {
+cep-backend     | [FaultAgent]       "avg_before": 0.035,
+cep-backend     | [FaultAgent]       "avg_after": 0.03,
+cep-backend     | [FaultAgent]       "delta_pct": -14.29
+cep-backend     | [FaultAgent]     },
+cep-backend     | [FaultAgent]     "mem_used_bytes": {
+cep-backend     | [FaultAgent]       "avg_before": 26314014.7,
+cep-backend     | [FaultAgent]       "avg_after": 26256343.0,
+cep-backend     | [FaultAgent]       "delta_pct": -0.22
+cep-backend     | [FaultAgent]     }
+cep-backend     | [FaultAgent]   }
+cep-backend     | [FaultAgent] }
+cep-backend     | [FaultAgent]
+cep-backend     | [FaultAgent]
+cep-backend     | [FaultAgent] ✅ Fault injection completed successfully
