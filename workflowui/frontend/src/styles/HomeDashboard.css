@@ -1,35 +1,159 @@
+/* Container & Background */
 .home-wrapper {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center; /* Horizontally centers the container */
+  align-items: center;     /* Vertically centers the container */
   min-height: 100vh;
+  background-color: #0a0a0a;
+  overflow: hidden;
+  position: relative;
+  width: 100%;             /* Ensure it spans full width */
 }
 
 .home-container {
+  display: flex;
+  flex-direction: column;  /* Stack title, subtitle, and grid vertically */
+  align-items: center;     /* Center children horizontally within the container */
+  justify-content: center; /* Center children vertically if container has height */
   text-align: center;
-}
-
-.home-title {
-  font-size: 2.5rem;
+  z-index: 1;
 }
 
 .home-grid {
   display: flex;
+  justify-content: center; /* Centers the card within the flex row */
+  align-items: center;
   gap: 20px;
-  justify-content: center;
   margin-top: 30px;
+  width: 100%;             /* Ensure the grid doesn't collapse to the left */
+}
+/* Animated Grid Background */
+.chaos-grid-bg {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    linear-gradient(rgba(0, 119, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 119, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  transform: rotate(15deg);
+  animation: gridMove 20s linear infinite;
+  z-index: 0;
 }
 
+@keyframes gridMove {
+  from { transform: rotate(15deg) translateY(0); }
+  to { transform: rotate(15deg) translateY(-500px); }
+}
+
+
+/* Glitch Animation for Title */
+.home-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  position: relative;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Chaos Glitch Effect */
+.home-title::before,
+.home-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+}
+
+.home-title::after {
+  left: 2px;
+  text-shadow: -2px 0 #0077ff;
+  clip: rect(44px, 450px, 56px, 0);
+  animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+  0% { clip: rect(31px, 9999px, 94px, 0); }
+  20% { clip: rect(62px, 9999px, 42px, 0); }
+  100% { clip: rect(10px, 9999px, 85px, 0); }
+}
+
+.home-subtitle {
+  color: #888;
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards 0.5s;
+}
+
+/* The Card: Resilience & Stability */
 .home-card {
-  background: gray;
-  padding: 20px;
-  border-radius: 12px;
-  width: 200px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  background: rgba(30, 30, 30, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 16px;
+  width: 260px;
+  border: 1px solid #333;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-button {
-  margin-top: 10px;
-  padding: 10px 14px;
+.home-card:hover {
+  transform: translateY(-10px);
+  border-color: #0077ff;
+  box-shadow: 0 15px 40px rgba(0, 119, 255, 0.2);
+}
+
+/* Pulse animation inside the card */
+.card-pulse {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0,119,255,0.1) 0%, transparent 70%);
+  animation: pulseRotate 4s linear infinite;
+}
+
+@keyframes pulseRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.home-card h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  position: relative;
+}
+
+/* Button Styling */
+.glow-button {
+  margin-top: 25px;
+  padding: 12px 24px;
+  background: #0077ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.glow-button:hover {
+  background: #0056b3;
+  box-shadow: 0 0 20px rgba(0, 119, 255, 0.6);
+  transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
 }

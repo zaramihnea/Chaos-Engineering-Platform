@@ -273,5 +273,59 @@
   background: #666;
 }
 
+/* Existing styles stay the same ... */
 
+/* --- RESPONSIVE ADJUSTMENTS --- */
+
+/* 1. Main Content Layout */
+@media (max-width: 992px) {
+  .exp-content {
+    flex-direction: column; /* Stack left and right sections */
+  }
+
+  .exp-left, 
+  .exp-right {
+    width: 100%; /* Take full width when stacked */
+  }
+
+  .details-exp {
+    flex-direction: column; /* Stack overview and target system */
+    gap: 20px;
+  }
+}
+
+/* 2. Table Responsibility */
+.detail-card {
+  overflow-x: auto; /* Allows tables to scroll horizontally on small screens */
+}
+
+@media (max-width: 600px) {
+  .exp-container {
+    padding: 15px; /* Less padding on mobile */
+  }
+
+  .exp-title {
+    font-size: 1.5rem;
+  }
+
+  .small-table {
+    font-size: 12px; /* Smaller font for tight tables */
+  }
+
+  /* Make the donut chart slightly smaller for mobile */
+  .donut-chart {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .inner {
+    left: 40%;
+  }
+  
+  /* Ensure inputs take full width on mobile */
+  .scheduler-panel input[type="datetime-local"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
 
