@@ -34,30 +34,9 @@ export default function ExperimentDetail() {
       }
     }
     fetchData();
-  }, [id]);
+  }, [id,runs]);
 
-  const runNow = async () => {
-    const payload = {
-      // This maps to java.time.Duration on your backend
-      timeout: "PT0S",
-      dryRun: false, // Assuming immediate runs aren't usually dry runs
-      timestamp: new Date().toISOString(),
-    };
 
-    // try {
-    //   const response = await fetch("/api/experiment/run", {
-    //     method: "POST",
-    //     headers: { "Content-Type": "application/json" },
-    //     body: JSON.stringify(payload),
-    //   });
-
-    //   if (response.ok) {
-    //     alert("Experiment started immediately!");
-    //   }
-    // } catch (error) {
-    //   console.error("Failed to trigger run:", error);
-    // }
-  };
   async function deleteRun(runId) {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete run ${runId}?`
@@ -302,7 +281,7 @@ export default function ExperimentDetail() {
                           }}
                           onClick={() => deleteRun(run.runId)}
                         >
-                          ❌ Delete
+                          ✖
                         </button>
                       </td>
                     </tr>
@@ -369,55 +348,6 @@ export default function ExperimentDetail() {
             )}
           </div>
 
-          <div className="detail-card">
-            <h3>Run Experiment Now</h3>
-
-            <div className="action-buttons">
-              {!showScheduler && (
-                <>
-                  {/* New Immediate Run Button */}
-                  <button
-                    className="schedule-btn"
-                    onClick={runNow}
-                  >
-                   ▶ Run Now
-                  </button>
-                </>
-              )}
-            </div>
-
-            {showScheduler && (
-              <div className="scheduler-panel">
-                <label>When to run:</label>
-                <input
-                  type="datetime-local"
-                  value={scheduleTime}
-                  onChange={(e) => setScheduleTime(e.target.value)}
-                />
-
-                <label className="checkbox-row">
-                  Dry Run Mode
-                  <input
-                    type="checkbox"
-                    checked={scheduleDryRun}
-                    onChange={(e) => setScheduleDryRun(e.target.checked)}
-                  />
-                </label>
-
-                <div className="scheduler-buttons">
-                  <button className="confirm-btn" onClick={scheduleRun}>
-                    Schedule
-                  </button>
-                  <button
-                    className="cancel-btn"
-                    onClick={() => setShowScheduler(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
 
           <div className="detail-card">
             <h3>Download Reports</h3>

@@ -38,7 +38,6 @@ export default function CreateExperiment() {
 
   const targets = ["POD_KILL", "CPU_STRESS", "MEMORY_STRESS", "NETWORK_DELAY", "NETWORK_PARTITION"];
 
-  // --- Handlers pentru Adăugare ---
   const addParameter = () => {
     if (!paramKey || !paramValue) return;
     setParameters([...parameters, { key: paramKey, value: paramValue }]);
@@ -124,6 +123,33 @@ const buildApiPayload = () => {
     try {
       console.log(payload)
       const response = await fetch("/api/experiments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        showStatus("Experiment created successfully!", "success");
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        showStatus(`Failed to submit: ${errorData.message || 'Server error'}`, "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showStatus("Connection error. Could not reach the server.", "error");
+    }
+  };
+
+  const submitAndRunNow = async () => {
+    if (!experimentalName || !faultType) {
+        showStatus("Please fill in the required fields (Name and Fault Type).", "error");
+        return;
+    }
+
+    const payload = buildApiPayload();
+    try {
+      console.log(payload)
+      const response = await fetch(`/api/experiments?autoRun=true&dryRun=false`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -264,7 +290,14 @@ const buildApiPayload = () => {
         </div>
       )}
 
-      <button className="submit-btn" onClick={submitExperiment}>Submit Experiment</button>
+      <div className="button-footer">
+        <button className="submit-btn secondary" onClick={submitExperiment}>
+          Submit Only
+        </button>
+        <button className="submit-btn" onClick={submitAndRunNow}>
+          Submit & Run Now
+        </button>
+      </div>
     </div>
   );
 }

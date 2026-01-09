@@ -134,3 +134,17 @@ button {
   border-radius: 8px;
 }
 .row-switch input { width: auto; }
+
+.button-footer {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.submit-btn {
+  flex: 1;
+}
+
+.submit-btn.secondary {
+  background-color: #555;
+}

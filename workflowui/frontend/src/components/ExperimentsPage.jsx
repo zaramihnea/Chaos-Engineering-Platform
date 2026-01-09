@@ -177,15 +177,6 @@ export default function ExperimentsPage() {
             </div>
             <p>Total Experiments: {experiments.length}</p>
           </div>
-
-          <div className="exp-events">
-            <h3>Events</h3>
-            <ul>
-              <li>
-                <strong>System</strong> — Experiment list loaded
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
